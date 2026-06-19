@@ -6,15 +6,23 @@ ChronoMap es una aplicación web interactiva para crear y gestionar líneas de t
 
 - **Gestión de Actividades**: Agrega, edita y elimina actividades en la línea de tiempo
 - **Interactividad**: Arrastra actividades para moverlas, usa los bordes para extender su duración
+- **Modal de Propiedades**: Doble click en actividad abre modal flotante con todos los detalles
 - **Subcarriles Dinámicos**: 
   - Detección automática de actividades solapadas
   - Reorganización manual arrastrando verticalmente
   - Altura de carriles ajustable según necesidad
+- **Diferenciador Visual de Áreas**:
+  - Fondo de color suave en cada carril
+  - Etiqueta con nombre del área visible
+- **Panel Colapsable**: Panel de áreas colapsable para más espacio
 - **Copiar/Pegar**: 
   - Atajos de teclado (Ctrl+C / Ctrl+V)
   - Menú contextual (click derecho)
   - Duplicar actividades rápidamente
-- **Zoom**: Controles de zoom para visualizar diferentes escalas de tiempo
+- **Zoom Avanzado**: 
+  - Controles de zoom (0.5x - 10x)
+  - Ctrl+Scroll para zoom intuitivo
+- **Limpiar Lienzo**: Botón para limpiar todas las actividades con confirmación
 - **Importación/Exportación**:
   - Importar proyectos desde archivos JSON
   - Exportar a JSON para guardar el progreso
@@ -42,7 +50,15 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 
 ## 📋 Roadmap
 
-### Versión 1.1 (Actual)
+### Versión 1.2 (Actual)
+- ✅ Modal de propiedades (doble click)
+- ✅ Diferenciador visual de áreas (fondo + etiqueta)
+- ✅ Panel de áreas colapsable
+- ✅ Zoom con Ctrl+Scroll (0.5x - 10x)
+- ✅ Botón limpiar lienzo con confirmación
+- ✅ Estructura base de undo/redo
+
+### Versión 1.1
 - ✅ Sistema de subcarriles dinámicos
 - ✅ Copiar/Pegar actividades (Ctrl+C/V)
 - ✅ Menú contextual (click derecho)
@@ -60,12 +76,12 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 - ✅ Panel de áreas organizativas
 
 ### Próximas Funcionalidades (Roadmap)
+- [ ] UI para undo/redo (Ctrl+Z / Ctrl+Y)
 - [ ] Múltiples timelines en un mismo proyecto
 - [ ] Colaboración en tiempo real
 - [ ] Plantillas predefinidas
 - [ ] Modo oscuro
 - [ ] Más atajos de teclado
-- [ ] Historial de cambios (undo/redo)
 - [ ] Filtros y búsqueda avanzada
 - [ ] Integración con calendarios externos
 - [ ] Exportar a PDF
@@ -90,14 +106,17 @@ cd Timelines
 
 ### Uso
 1. **Agregar Actividad**: Click en "Nueva Actividad"
-2. **Mover Actividad**: Arrastra la actividad horizontalmente
-3. **Cambiar Subcarril**: Arrastra la actividad verticalmente dentro del área
-4. **Extender Duración**: Arrastra desde los bordes de la actividad
-5. **Copiar/Pegar**: Selecciona actividad y usa Ctrl+C / Ctrl+V
-6. **Menú Contextual**: Click derecho sobre actividad para más opciones
-7. **Zoom**: Usa los controles + y - en la barra superior
-8. **Exportar**: Usa los botones JSON o PNG para guardar tu trabajo
-9. **Importar**: Click en "Importar" para cargar un archivo JSON previamente guardado
+2. **Editar Actividad**: Doble click en actividad para abrir modal de propiedades
+3. **Mover Actividad**: Arrastra la actividad horizontalmente
+4. **Cambiar Subcarril**: Arrastra la actividad verticalmente dentro del área
+5. **Extender Duración**: Arrastra desde los bordes de la actividad
+6. **Copiar/Pegar**: Selecciona actividad y usa Ctrl+C / Ctrl+V
+7. **Menú Contextual**: Click derecho sobre actividad para más opciones
+8. **Zoom**: Usa los controles +/- o Ctrl+Scroll del mouse
+9. **Colapsar Panel**: Click en botón de flecha en panel de áreas
+10. **Limpiar Lienzo**: Click en botón "Limpiar" (con confirmación)
+11. **Exportar**: Usa los botones JSON o PNG para guardar tu trabajo
+12. **Importar**: Click en "Importar" para cargar un archivo JSON previamente guardado
 
 ## 📁 Estructura del Proyecto
 
@@ -127,4 +146,4 @@ Este proyecto está bajo la Licencia MIT.
 
 ---
 
-**Versión 1.1** - Subcarriles dinámicos y copiar/pegar para mejor organización de actividades solapadas.
+**Versión 1.2** - Mejoras visuales y UX: modal de propiedades, diferenciador de áreas, panel colapsable, zoom con scroll y limpiar lienzo.
