@@ -6,6 +6,14 @@ ChronoMap es una aplicación web interactiva para crear y gestionar líneas de t
 
 - **Gestión de Actividades**: Agrega, edita y elimina actividades en la línea de tiempo
 - **Interactividad**: Arrastra actividades para moverlas, usa los bordes para extender su duración
+- **Subcarriles Dinámicos**: 
+  - Detección automática de actividades solapadas
+  - Reorganización manual arrastrando verticalmente
+  - Altura de carriles ajustable según necesidad
+- **Copiar/Pegar**: 
+  - Atajos de teclado (Ctrl+C / Ctrl+V)
+  - Menú contextual (click derecho)
+  - Duplicar actividades rápidamente
 - **Zoom**: Controles de zoom para visualizar diferentes escalas de tiempo
 - **Importación/Exportación**:
   - Importar proyectos desde archivos JSON
@@ -34,7 +42,15 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 
 ## 📋 Roadmap
 
-### Versión 1.0 (Actual)
+### Versión 1.1 (Actual)
+- ✅ Sistema de subcarriles dinámicos
+- ✅ Copiar/Pegar actividades (Ctrl+C/V)
+- ✅ Menú contextual (click derecho)
+- ✅ Duplicar actividades
+- ✅ Arrastre vertical entre subcarriles
+- ✅ Altura de carriles ajustable
+
+### Versión 1.0
 - ✅ Interfaz básica de línea de tiempo
 - ✅ Agregar y editar actividades
 - ✅ Arrastrar y redimensionar actividades
@@ -44,15 +60,15 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 - ✅ Panel de áreas organizativas
 
 ### Próximas Funcionalidades (Roadmap)
-- [ ] Persistencia local (localStorage)
 - [ ] Múltiples timelines en un mismo proyecto
 - [ ] Colaboración en tiempo real
 - [ ] Plantillas predefinidas
 - [ ] Modo oscuro
-- [ ] Atajos de teclado
+- [ ] Más atajos de teclado
 - [ ] Historial de cambios (undo/redo)
 - [ ] Filtros y búsqueda avanzada
 - [ ] Integración con calendarios externos
+- [ ] Exportar a PDF
 
 ## 🚀 Instalación y Uso
 
@@ -75,10 +91,13 @@ cd Timelines
 ### Uso
 1. **Agregar Actividad**: Click en "Nueva Actividad"
 2. **Mover Actividad**: Arrastra la actividad horizontalmente
-3. **Extender Duración**: Arrastra desde los bordes de la actividad
-4. **Zoom**: Usa los controles + y - en la barra superior
-5. **Exportar**: Usa los botones JSON o PNG para guardar tu trabajo
-6. **Importar**: Click en "Importar" para cargar un archivo JSON previamente guardado
+3. **Cambiar Subcarril**: Arrastra la actividad verticalmente dentro del área
+4. **Extender Duración**: Arrastra desde los bordes de la actividad
+5. **Copiar/Pegar**: Selecciona actividad y usa Ctrl+C / Ctrl+V
+6. **Menú Contextual**: Click derecho sobre actividad para más opciones
+7. **Zoom**: Usa los controles + y - en la barra superior
+8. **Exportar**: Usa los botones JSON o PNG para guardar tu trabajo
+9. **Importar**: Click en "Importar" para cargar un archivo JSON previamente guardado
 
 ## 📁 Estructura del Proyecto
 
@@ -108,4 +127,4 @@ Este proyecto está bajo la Licencia MIT.
 
 ---
 
-**Versión 1.0** - Primera versión estable con funcionalidades core de gestión de timelines.
+**Versión 1.1** - Subcarriles dinámicos y copiar/pegar para mejor organización de actividades solapadas.

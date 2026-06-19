@@ -40,6 +40,45 @@
         .grab-cursor { cursor: grab; }
         .grabbing-cursor { cursor: grabbing !important; }
         .resize-x-cursor { cursor: col-resize; }
+        
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 180px;
+            padding: 4px;
+        }
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+        }
+        .context-menu-item:hover {
+            background-color: #f1f5f9;
+        }
+        .context-menu-item.danger:hover {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        .context-menu-divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 4px 0;
+        }
+        
+        /* Sublane indicators */
+        .sublane-divider {
+            border-top: 1px dashed #e2e8f0;
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen text-slate-900 selection:bg-blue-100">
@@ -140,6 +179,11 @@
         </div>
     </div>
 
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+        <!-- Se llena dinámicamente -->
+    </div>
+
     <script>
         // --- CONSTANTES ---
         const TOTAL_MINUTES = 24 * 60; // 1440
@@ -150,7 +194,8 @@
             areas: [],
             nodes: [],
             zoom: 2, // pixelsPerMinute
-            selectedNodeId: null
+            selectedNodeId: null,
+            copiedNode: null // Para copiar/pegar
         };
 
         // Estado de Interacción (Drag & Drop)
@@ -180,10 +225,14 @@
 
             if (savedNodes) {
                 state.nodes = JSON.parse(savedNodes);
+                // Asegurar que todos los nodos tengan sublane
+                state.nodes.forEach(n => {
+                    if (n.sublane === undefined) n.sublane = 0;
+                });
             } else {
                 state.nodes = [
-                    { id: 'n1', name: 'Revisión matutina', startTime: 480, endTime: 540, areaId: 'a1', color: '#eff6ff', description: 'Revisión de métricas', customFields: [] },
-                    { id: 'n2', name: 'Proceso Batch', startTime: 600, endTime: 720, areaId: 'a2', color: '#ecfdf5', description: '', customFields: [{ id: 'cf1', key: 'Ticket', value: 'B-102' }] }
+                    { id: 'n1', name: 'Revisión matutina', startTime: 480, endTime: 540, areaId: 'a1', color: '#eff6ff', description: 'Revisión de métricas', customFields: [], sublane: 0 },
+                    { id: 'n2', name: 'Proceso Batch', startTime: 600, endTime: 720, areaId: 'a2', color: '#ecfdf5', description: '', customFields: [{ id: 'cf1', key: 'Ticket', value: 'B-102' }], sublane: 0 }
                 ];
             }
 
@@ -228,6 +277,52 @@
             const overlay = document.getElementById('loading-overlay');
             overlay.classList.remove('opacity-100');
             overlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // --- SISTEMA DE SUBCARRILES ---
+        function calculateSublanes(areaId) {
+            const nodesInArea = state.nodes.filter(n => n.areaId === areaId);
+            if (nodesInArea.length === 0) return 1;
+
+            // Ordenar por startTime
+            nodesInArea.sort((a, b) => a.startTime - b.startTime);
+
+            // Algoritmo de asignación de subcarriles
+            const sublanes = [];
+            
+            nodesInArea.forEach(node => {
+                // Buscar el primer subcarril disponible
+                let assignedSublane = -1;
+                
+                for (let i = 0; i < sublanes.length; i++) {
+                    const lastNodeInSublane = sublanes[i];
+                    // Si no hay solapamiento, podemos usar este subcarril
+                    if (lastNodeInSublane.endTime <= node.startTime) {
+                        assignedSublane = i;
+                        sublanes[i] = node;
+                        break;
+                    }
+                }
+                
+                // Si no encontramos subcarril disponible, crear uno nuevo
+                if (assignedSublane === -1) {
+                    assignedSublane = sublanes.length;
+                    sublanes.push(node);
+                }
+                
+                // Asignar subcarril al nodo (solo si no tiene uno manual)
+                if (node.sublane === undefined || node.sublane === 0) {
+                    node.sublane = assignedSublane;
+                }
+            });
+
+            return sublanes.length;
+        }
+
+        function getAreaSublaneCount(areaId) {
+            const nodesInArea = state.nodes.filter(n => n.areaId === areaId);
+            if (nodesInArea.length === 0) return 1;
+            return Math.max(...nodesInArea.map(n => n.sublane || 0)) + 1;
         }
 
         function renderAll() {
@@ -295,6 +390,12 @@
             let html = '';
             
             state.areas.forEach(area => {
+                // Calcular subcarriles automáticamente
+                calculateSublanes(area.id);
+                const sublaneCount = getAreaSublaneCount(area.id);
+                const sublaneHeight = 60; // Altura de cada subcarril
+                const areaHeight = sublaneCount * sublaneHeight + 16; // +16 para padding
+                
                 const nodesInArea = state.nodes.filter(n => n.areaId === area.id);
                 let nodesHtml = nodesInArea.map(node => {
                     const width = (node.endTime - node.startTime) * state.zoom;
@@ -302,7 +403,12 @@
                     const isSelected = state.selectedNodeId === node.id;
                     const isInteracting = interaction && interaction.id === node.id;
                     
-                    let classes = "absolute top-2 bottom-2 rounded-xl flex flex-col p-2.5 overflow-hidden transition-all duration-75 select-none group grab-cursor ";
+                    // Posicionamiento vertical basado en sublane
+                    const sublane = node.sublane || 0;
+                    const top = sublane * sublaneHeight + 8;
+                    const height = sublaneHeight - 16;
+                    
+                    let classes = "absolute rounded-xl flex flex-col p-2.5 overflow-hidden transition-all duration-75 select-none group grab-cursor ";
                     if (isSelected) classes += "ring-2 ring-blue-500 ring-offset-1 shadow-md z-10 ";
                     else classes += "border border-slate-200/60 shadow-sm hover:shadow-md hover:border-slate-300 ";
                     if (isInteracting) classes += "opacity-90 scale-[1.02] shadow-xl z-20 grabbing-cursor";
@@ -319,7 +425,7 @@
                     }
 
                     return `
-                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; width: ${width}px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')">
+                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')" oncontextmenu="showContextMenu(event, '${node.id}')">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 pointer-events-none" style="background-color: ${area.color}"></div>
                         <div class="flex items-center justify-between mb-1 pointer-events-none pl-1">
                             <span class="text-xs font-bold text-slate-700 truncate pr-2">${node.name}</span>
@@ -331,7 +437,14 @@
                     </div>`;
                 }).join('');
 
-                html += `<div class="h-[76px] relative rounded-xl border border-transparent hover:border-slate-200/50 hover:bg-slate-100/30 transition-colors" data-area-id="${area.id}">${nodesHtml}</div>`;
+                // Generar divisores de subcarriles
+                let sublanesDividers = '';
+                for (let i = 1; i < sublaneCount; i++) {
+                    const dividerTop = i * sublaneHeight + 8;
+                    sublanesDividers += `<div class="absolute left-0 right-0 sublane-divider" style="top: ${dividerTop}px;"></div>`;
+                }
+
+                html += `<div class="relative rounded-xl border border-transparent hover:border-slate-200/50 hover:bg-slate-100/30 transition-all" style="height: ${areaHeight}px; min-height: 76px;" data-area-id="${area.id}">${sublanesDividers}${nodesHtml}</div>`;
             });
             container.innerHTML = html;
         }
@@ -431,6 +544,84 @@
             });
             
             document.getElementById('file-input').addEventListener('change', importFromJson);
+            
+            // Copiar/Pegar con teclado
+            document.addEventListener('keydown', handleKeyboard);
+            
+            // Cerrar menú contextual al hacer click fuera
+            document.addEventListener('click', hideContextMenu);
+        }
+
+        function handleKeyboard(e) {
+            // Ctrl+C - Copiar
+            if (e.ctrlKey && e.key === 'c' && state.selectedNodeId) {
+                e.preventDefault();
+                copyNode();
+            }
+            // Ctrl+V - Pegar
+            if (e.ctrlKey && e.key === 'v' && state.copiedNode) {
+                e.preventDefault();
+                pasteNode();
+            }
+            // Delete - Eliminar
+            if (e.key === 'Delete' && state.selectedNodeId) {
+                e.preventDefault();
+                deleteSelectedNode();
+            }
+        }
+
+        function copyNode() {
+            const node = state.nodes.find(n => n.id === state.selectedNodeId);
+            if (!node) return;
+            
+            state.copiedNode = JSON.parse(JSON.stringify(node));
+            showToast('✅ Actividad copiada');
+        }
+
+        function pasteNode() {
+            if (!state.copiedNode) return;
+            
+            const newNode = JSON.parse(JSON.stringify(state.copiedNode));
+            newNode.id = 'n' + Date.now();
+            newNode.name = newNode.name + ' (Copia)';
+            
+            // Desplazar 15 minutos para evitar solapamiento exacto
+            newNode.startTime += 15;
+            newNode.endTime += 15;
+            
+            // Ajustar si se pasa del límite
+            if (newNode.endTime > TOTAL_MINUTES) {
+                const duration = newNode.endTime - newNode.startTime;
+                newNode.endTime = TOTAL_MINUTES;
+                newNode.startTime = TOTAL_MINUTES - duration;
+            }
+            
+            state.nodes.push(newNode);
+            state.selectedNodeId = newNode.id;
+            renderAll();
+            showToast('✅ Actividad pegada');
+        }
+
+        function duplicateNode(nodeId) {
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            const newNode = JSON.parse(JSON.stringify(node));
+            newNode.id = 'n' + Date.now();
+            newNode.name = newNode.name + ' (Duplicado)';
+            newNode.startTime += 15;
+            newNode.endTime += 15;
+            
+            if (newNode.endTime > TOTAL_MINUTES) {
+                const duration = newNode.endTime - newNode.startTime;
+                newNode.endTime = TOTAL_MINUTES;
+                newNode.startTime = TOTAL_MINUTES - duration;
+            }
+            
+            state.nodes.push(newNode);
+            state.selectedNodeId = newNode.id;
+            renderAll();
+            showToast('✅ Actividad duplicada');
         }
 
         function startInteraction(e, nodeId, mode) {
@@ -478,10 +669,32 @@
                 if (e.clientY > rect.top + 40 && e.clientY < rect.bottom) {
                     const scrollY = container.scrollTop;
                     const relativeY = e.clientY - rect.top + scrollY - 40;
-                    const laneIndex = Math.floor(relativeY / 96);
-                    if (laneIndex >= 0 && laneIndex < state.areas.length) {
-                        n.areaId = state.areas[laneIndex].id;
+                    
+                    // Calcular área y subcarril
+                    let accumulatedHeight = 0;
+                    let targetAreaId = n.areaId;
+                    let targetSublane = n.sublane || 0;
+                    
+                    for (let i = 0; i < state.areas.length; i++) {
+                        const area = state.areas[i];
+                        const sublaneCount = getAreaSublaneCount(area.id);
+                        const sublaneHeight = 60;
+                        const areaHeight = Math.max(sublaneCount * sublaneHeight + 16, 76);
+                        
+                        if (relativeY >= accumulatedHeight && relativeY < accumulatedHeight + areaHeight) {
+                            targetAreaId = area.id;
+                            // Calcular subcarril dentro del área
+                            const yInArea = relativeY - accumulatedHeight;
+                            targetSublane = Math.floor(yInArea / sublaneHeight);
+                            if (targetSublane >= sublaneCount) targetSublane = sublaneCount - 1;
+                            if (targetSublane < 0) targetSublane = 0;
+                            break;
+                        }
+                        accumulatedHeight += areaHeight + 4; // +4 para el espacio entre áreas
                     }
+                    
+                    n.areaId = targetAreaId;
+                    n.sublane = targetSublane;
                 }
             } else if (interaction.mode === 'resize-left') {
                 newStart = interaction.initialStart + deltaMinutes;
@@ -551,6 +764,53 @@
             showToast("Área eliminada");
         }
 
+        // --- MENÚ CONTEXTUAL ---
+        function showContextMenu(e, nodeId) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const menu = document.getElementById('context-menu');
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            selectNode(nodeId);
+            
+            const canPaste = state.copiedNode !== null;
+            
+            menu.innerHTML = `
+                <div class="context-menu-item" onclick="copyNode(); hideContextMenu();">
+                    <i class="ph ph-copy"></i>
+                    <span>Copiar</span>
+                    <span class="ml-auto text-xs text-slate-400">Ctrl+C</span>
+                </div>
+                ${canPaste ? `
+                <div class="context-menu-item" onclick="pasteNode(); hideContextMenu();">
+                    <i class="ph ph-clipboard"></i>
+                    <span>Pegar</span>
+                    <span class="ml-auto text-xs text-slate-400">Ctrl+V</span>
+                </div>` : ''}
+                <div class="context-menu-item" onclick="duplicateNode('${nodeId}'); hideContextMenu();">
+                    <i class="ph ph-copy-simple"></i>
+                    <span>Duplicar</span>
+                </div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item danger" onclick="deleteSelectedNode(); hideContextMenu();">
+                    <i class="ph ph-trash"></i>
+                    <span>Eliminar</span>
+                    <span class="ml-auto text-xs text-slate-400">Del</span>
+                </div>
+            `;
+            
+            menu.style.left = `${e.clientX}px`;
+            menu.style.top = `${e.clientY}px`;
+            menu.classList.remove('hidden');
+        }
+
+        function hideContextMenu() {
+            const menu = document.getElementById('context-menu');
+            menu.classList.add('hidden');
+        }
+
         function addNode() {
             if (state.areas.length === 0) {
                 showToast("Por favor, crea un Área primero.");
@@ -564,7 +824,8 @@
                 areaId: state.areas[0].id,
                 color: '#ffffff',
                 description: '',
-                customFields: []
+                customFields: [],
+                sublane: 0
             };
             state.nodes.push(newNode);
             state.selectedNodeId = newNode.id;
