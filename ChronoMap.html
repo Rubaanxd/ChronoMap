@@ -62,9 +62,12 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 4px; transition: background 0.2s; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
 
-        .grab-cursor { cursor: grab; }
+        .grab-cursor { cursor: move !important; }
+        .grab-cursor:active { cursor: grabbing !important; }
         .grabbing-cursor { cursor: grabbing !important; }
         .resize-x-cursor { cursor: col-resize; }
+        #scroll-container { cursor: grab; }
+        #scroll-container:active { cursor: grabbing; }
         
         /* Context Menu */
         .context-menu { position: fixed; background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 1000; min-width: 180px; padding: 4px; transition: all 0.3s; }
@@ -342,8 +345,13 @@
             <span>Limpiar</span>
         </button>
         <div class="w-px h-4 bg-slate-300"></div>
+        <button onclick="toggleViewMode()" id="view-mode-toggle" class="flex items-center space-x-2 px-4 py-1.5 bg-white border border-slate-200 shadow-sm hover:border-purple-400 hover:text-purple-600 text-slate-700 text-sm font-medium rounded-lg transition-all">
+            <i id="view-mode-icon" class="ph ph-eye text-lg"></i>
+            <span id="view-mode-text">Presentación</span>
+        </button>
+        <div class="w-px h-4 bg-slate-300"></div>
         <span class="text-xs text-slate-500 hidden sm:flex items-center">
-            <i class="ph ph-dots-six-vertical mr-1 opacity-50"></i> Arrastra para mover • Doble clic para editar propiedades y dependencias
+            <i class="ph ph-hand mr-1 opacity-50"></i> Arrastra espacio vacío para desplazar • Arrastra nodos para mover • Doble clic para editar
         </span>
         <div class="flex-1"></div>
         
@@ -431,15 +439,29 @@
             selectedNodeId: null,
             copiedNode: null,
             isPanelCollapsed: false,
-            theme: 'light'
+            theme: 'light',
+            viewMode: 'edit' // 'edit' | 'readonly' | 'presentation'
         };
 
         let interaction = null;
+        let panState = null; // { startX, startY, scrollLeft, scrollTop }
 
         function init() {
+            // Detectar modo de vista desde URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewParam = urlParams.get('view');
+            if (viewParam === 'readonly' || viewParam === 'presentation') {
+                state.viewMode = viewParam;
+            }
+            
             loadData();
             setupEventListeners();
             renderAll();
+            
+            // Aplicar modo de vista si es necesario
+            if (state.viewMode !== 'edit') {
+                applyViewMode();
+            }
         }
         
         function toggleTheme() {
@@ -459,6 +481,77 @@
                 body.classList.remove('theme-dark');
                 icon.className = 'ph ph-moon text-lg';
             }
+        }
+        
+        function applyViewMode() {
+            const isReadOnly = state.viewMode === 'readonly' || state.viewMode === 'presentation';
+            
+            if (isReadOnly) {
+                // Ocultar botones de edición en header
+                const editButtons = document.querySelectorAll('button[onclick*="addNode"], button[onclick*="clearCanvas"], button[onclick*="document.getElementById(\'file-input\')"]');
+                editButtons.forEach(btn => btn.style.display = 'none');
+                
+                // Ocultar input de archivo
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) fileInput.style.display = 'none';
+                
+                // Ocultar panel de áreas o hacerlo readonly
+                const areasPanel = document.getElementById('areas-panel');
+                if (state.viewMode === 'readonly') {
+                    // En readonly, ocultar botones de edición de áreas
+                    setTimeout(() => {
+                        const areaButtons = document.querySelectorAll('#areas-container button');
+                        areaButtons.forEach(btn => btn.style.display = 'none');
+                        const areaInputs = document.querySelectorAll('#areas-container input');
+                        areaInputs.forEach(input => {
+                            input.disabled = true;
+                            input.style.cursor = 'not-allowed';
+                        });
+                    }, 100);
+                }
+                
+                // Agregar badge de modo vista
+                const header = document.querySelector('header h1');
+                if (header && !document.getElementById('view-mode-badge')) {
+                    const badge = document.createElement('span');
+                    badge.id = 'view-mode-badge';
+                    badge.className = 'ml-2 px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-600 rounded-full uppercase tracking-wide';
+                    badge.textContent = state.viewMode === 'presentation' ? 'Presentación' : 'Solo Vista';
+                    header.appendChild(badge);
+                }
+                
+                // Deshabilitar drag & drop
+                interaction = null;
+            }
+        }
+        
+        function toggleViewMode() {
+            const btn = document.getElementById('view-mode-toggle');
+            const icon = document.getElementById('view-mode-icon');
+            const text = document.getElementById('view-mode-text');
+            
+            if (state.viewMode === 'edit') {
+                state.viewMode = 'presentation';
+                icon.className = 'ph ph-pencil-simple text-lg';
+                text.textContent = 'Editar';
+                if (btn) {
+                    btn.classList.add('bg-purple-50', 'border-purple-300', 'text-purple-700');
+                    btn.classList.remove('hover:border-purple-400', 'hover:text-purple-600');
+                }
+            } else {
+                state.viewMode = 'edit';
+                icon.className = 'ph ph-eye text-lg';
+                text.textContent = 'Presentación';
+                if (btn) {
+                    btn.classList.remove('bg-purple-50', 'border-purple-300', 'text-purple-700');
+                    btn.classList.add('hover:border-purple-400', 'hover:text-purple-600');
+                }
+                // Recargar para restaurar controles
+                window.location.href = window.location.pathname;
+                return;
+            }
+            applyViewMode();
+            renderAll();
         }
 
         function loadData() {
@@ -818,16 +911,77 @@
         function setupEventListeners() {
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
-            document.getElementById('scroll-container').addEventListener('mousedown', (e) => {
-                if (e.target.id === 'scroll-container' || e.target.id === 'timeline-wrapper') selectNode(null);
+            
+            const scrollContainer = document.getElementById('scroll-container');
+            
+            // Actualizar cursor según posición del mouse
+            scrollContainer.addEventListener('mousemove', (e) => {
+                if (panState) return; // No cambiar cursor mientras se arrastra
+                
+                const isOverNode = e.target.closest('.grab-cursor');
+                if (isOverNode) {
+                    scrollContainer.style.cursor = '';
+                } else {
+                    scrollContainer.style.cursor = 'grab';
+                }
             });
+            
+            scrollContainer.addEventListener('mousedown', (e) => {
+                const isOverNode = e.target.closest('.grab-cursor');
+                
+                if (!isOverNode && (e.target.id === 'scroll-container' || e.target.id === 'timeline-wrapper' || e.target.closest('#lanes-container'))) {
+                    selectNode(null);
+                    // Iniciar pan automáticamente en espacio vacío
+                    if (e.button === 0) {
+                        startPan(e);
+                    }
+                }
+            });
+            
+            scrollContainer.addEventListener('mousemove', handlePanMove);
+            scrollContainer.addEventListener('mouseup', endPan);
+            scrollContainer.addEventListener('mouseleave', endPan);
+            
             document.getElementById('file-input').addEventListener('change', importFromJson);
             document.addEventListener('keydown', handleKeyboard);
             document.addEventListener('click', hideContextMenu);
-            document.getElementById('scroll-container').addEventListener('wheel', handleZoomScroll, { passive: false });
+            scrollContainer.addEventListener('wheel', handleZoomScroll, { passive: false });
             document.getElementById('properties-modal-overlay').addEventListener('click', (e) => {
                 if (e.target.id === 'properties-modal-overlay') closePropertiesModal();
             });
+        }
+        
+        function startPan(e) {
+            const container = document.getElementById('scroll-container');
+            panState = {
+                startX: e.clientX,
+                startY: e.clientY,
+                scrollLeft: container.scrollLeft,
+                scrollTop: container.scrollTop
+            };
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+        
+        function handlePanMove(e) {
+            if (!panState) return;
+            
+            const container = document.getElementById('scroll-container');
+            const deltaX = e.clientX - panState.startX;
+            const deltaY = e.clientY - panState.startY;
+            
+            container.scrollLeft = panState.scrollLeft - deltaX;
+            container.scrollTop = panState.scrollTop - deltaY;
+            
+            e.preventDefault();
+        }
+        
+        function endPan() {
+            if (!panState) return;
+            
+            const container = document.getElementById('scroll-container');
+            container.style.cursor = 'grab';
+            panState = null;
         }
 
         function handleKeyboard(e) {
@@ -1144,6 +1298,9 @@
         let lastClickTime = 0; let lastClickNodeId = null; let dragOccurred = false;
         function handleNodeClick(e, nodeId) {
             if (dragOccurred) { dragOccurred = false; return; }
+            // Deshabilitar doble click en modo readonly
+            if (state.viewMode !== 'edit') return;
+            
             const now = Date.now();
             if (now - lastClickTime < 400 && lastClickNodeId === nodeId) {
                 interaction = null; openPropertiesModal(nodeId); lastClickTime = 0; lastClickNodeId = null;
@@ -1151,6 +1308,9 @@
         }
 
         function startInteraction(e, nodeId, mode) {
+            // Deshabilitar en modo readonly
+            if (state.viewMode !== 'edit') return;
+            
             e.stopPropagation();
             const node = state.nodes.find(n => n.id === nodeId);
             if (!node) return;
