@@ -1,0 +1,79 @@
+name: Dev CI - Validación
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Validar estructura de archivos
+        run: |
+          echo "✅ Validando estructura del proyecto..."
+          
+          # Verificar archivos esenciales
+          if [ ! -f "ChronoMap.html" ]; then
+            echo "❌ Error: ChronoMap.html no encontrado"
+            exit 1
+          fi
+          
+          if [ ! -f "index.html" ]; then
+            echo "❌ Error: index.html no encontrado"
+            exit 1
+          fi
+          
+          if [ ! -f "README.md" ]; then
+            echo "❌ Error: README.md no encontrado"
+            exit 1
+          fi
+          
+          echo "✅ Todos los archivos esenciales presentes"
+      
+      - name: Validar HTML
+        run: |
+          echo "✅ Validando sintaxis HTML..."
+          
+          # Verificar que no haya errores obvios de sintaxis
+          if grep -q "<<" ChronoMap.html; then
+            echo "❌ Error: Posible error de sintaxis en ChronoMap.html"
+            exit 1
+          fi
+          
+          echo "✅ HTML válido"
+      
+      - name: Verificar CDNs
+        run: |
+          echo "✅ Verificando enlaces CDN..."
+          
+          # Verificar que los CDNs estén presentes
+          if ! grep -q "cdn.tailwindcss.com" ChronoMap.html; then
+            echo "⚠️ Advertencia: Tailwind CSS CDN no encontrado"
+          fi
+          
+          if ! grep -q "phosphoricons.com" ChronoMap.html; then
+            echo "⚠️ Advertencia: Phosphor Icons CDN no encontrado"
+          fi
+          
+          if ! grep -q "html2canvas" ChronoMap.html; then
+            echo "⚠️ Advertencia: html2canvas CDN no encontrado"
+          fi
+          
+          echo "✅ CDNs verificados"
+      
+      - name: Resumen
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ VALIDACIÓN COMPLETADA"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Rama: dev"
+          echo "Commit: ${{ github.sha }}"
+          echo "Autor: ${{ github.actor }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚠️  Recuerda hacer merge a main cuando esté listo"
