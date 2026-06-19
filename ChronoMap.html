@@ -417,39 +417,58 @@
             const nodesInArea = state.nodes.filter(n => n.areaId === areaId);
             if (nodesInArea.length === 0) return 1;
 
-            // Ordenar por startTime
-            nodesInArea.sort((a, b) => a.startTime - b.startTime);
+            // Separar nodos con posición manual vs automática
+            const manualNodes = nodesInArea.filter(n => n.manualSublane === true);
+            const autoNodes = nodesInArea.filter(n => !n.manualSublane);
 
-            // Algoritmo de asignación de subcarriles
+            // Ordenar nodos automáticos por startTime, luego por endTime
+            autoNodes.sort((a, b) => {
+                if (a.startTime !== b.startTime) return a.startTime - b.startTime;
+                return a.endTime - b.endTime;
+            });
+
+            // Inicializar subcarriles con nodos manuales
             const sublanes = [];
+            manualNodes.forEach(node => {
+                const sublaneIndex = node.sublane || 0;
+                if (!sublanes[sublaneIndex]) sublanes[sublaneIndex] = [];
+                sublanes[sublaneIndex].push(node);
+            });
             
-            nodesInArea.forEach(node => {
-                // Buscar el primer subcarril disponible
+            // Asignar nodos automáticos
+            autoNodes.forEach(node => {
                 let assignedSublane = -1;
                 
-                for (let i = 0; i < sublanes.length; i++) {
-                    const lastNodeInSublane = sublanes[i];
-                    // Si no hay solapamiento, podemos usar este subcarril
-                    if (lastNodeInSublane.endTime <= node.startTime) {
+                // Buscar el primer subcarril donde NO haya colisión
+                for (let i = 0; i < 100; i++) { // Máximo 100 subcarriles
+                    if (!sublanes[i]) sublanes[i] = [];
+                    
+                    // Verificar si hay colisión con CUALQUIER nodo en este subcarril
+                    const hasCollision = sublanes[i].some(existingNode => {
+                        // Hay colisión si los rangos se solapan
+                        return !(existingNode.endTime <= node.startTime || existingNode.startTime >= node.endTime);
+                    });
+                    
+                    if (!hasCollision) {
                         assignedSublane = i;
-                        sublanes[i] = node;
+                        sublanes[i].push(node);
                         break;
                     }
                 }
                 
-                // Si no encontramos subcarril disponible, crear uno nuevo
-                if (assignedSublane === -1) {
-                    assignedSublane = sublanes.length;
-                    sublanes.push(node);
-                }
-                
-                // Asignar subcarril al nodo (solo si no tiene uno manual)
-                if (node.sublane === undefined || node.sublane === 0) {
+                // Asignar subcarril al nodo
+                if (assignedSublane !== -1) {
                     node.sublane = assignedSublane;
+                } else {
+                    // Fallback: asignar al final
+                    node.sublane = sublanes.length;
+                    sublanes.push([node]);
                 }
             });
 
-            return sublanes.length;
+            // Compactar subcarriles vacíos
+            const compactedSublanes = sublanes.filter(s => s && s.length > 0);
+            return Math.max(compactedSublanes.length, 1);
         }
 
         function getAreaSublaneCount(areaId) {
@@ -487,7 +506,7 @@
             state.areas.forEach(area => {
                 html += `
                 <div class="group flex items-center h-16 bg-white border border-slate-100 hover:border-slate-200 rounded-xl px-3 transition-all hover:shadow-sm">
-                    <div class="w-3 h-3 rounded-md mr-3 shrink-0 shadow-sm" style="background-color: ${area.color}"></div>
+                    <input type="color" value="${area.color}" onchange="updateAreaColor('${area.id}', this.value)" class="w-6 h-6 rounded-md mr-3 shrink-0 cursor-pointer border-0" title="Cambiar color" />
                     <input type="text" value="${area.name}" onchange="updateArea('${area.id}', this.value)" class="font-medium text-sm text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 w-full" />
                     <button onclick="removeArea('${area.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0 ml-1" title="Eliminar Área">
                         <i class="ph ph-trash text-base"></i>
@@ -568,7 +587,7 @@
                     }
 
                     return `
-                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')" ondblclick="openPropertiesModal('${node.id}')" oncontextmenu="showContextMenu(event, '${node.id}')">
+                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')" onmouseup="handleNodeClick(event, '${node.id}')" oncontextmenu="showContextMenu(event, '${node.id}')">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 pointer-events-none" style="background-color: ${area.color}"></div>
                         <div class="flex items-center justify-between mb-1 pointer-events-none pl-1">
                             <span class="text-xs font-bold text-slate-700 truncate pr-2">${node.name}</span>
@@ -705,6 +724,9 @@
         function openPropertiesModal(nodeId) {
             const node = state.nodes.find(n => n.id === nodeId);
             if (!node) return;
+            
+            // Cancelar cualquier interacción de drag
+            interaction = null;
             
             state.selectedNodeId = nodeId;
             
@@ -909,6 +931,37 @@
             renderAll();
         }
 
+        // Sistema de detección de doble click
+        let lastClickTime = 0;
+        let lastClickNodeId = null;
+        let dragOccurred = false;
+
+        function handleNodeClick(e, nodeId) {
+            // Si hubo drag, no procesar como click
+            if (dragOccurred) {
+                dragOccurred = false;
+                return;
+            }
+            
+            const now = Date.now();
+            const timeDiff = now - lastClickTime;
+            
+            // Si es doble click (menos de 400ms entre clicks en el mismo nodo)
+            if (timeDiff < 400 && lastClickNodeId === nodeId) {
+                // Cancelar drag
+                interaction = null;
+                // Abrir modal
+                openPropertiesModal(nodeId);
+                // Reset
+                lastClickTime = 0;
+                lastClickNodeId = null;
+            } else {
+                // Primer click
+                lastClickTime = now;
+                lastClickNodeId = nodeId;
+            }
+        }
+
         function startInteraction(e, nodeId, mode) {
             e.stopPropagation();
             const node = state.nodes.find(n => n.id === nodeId);
@@ -920,6 +973,7 @@
                 id: nodeId,
                 mode: mode,
                 startX: e.clientX,
+                startY: e.clientY,
                 initialStart: node.startTime,
                 initialEnd: node.endTime
             };
@@ -931,6 +985,15 @@
             if (!interaction) return;
 
             const deltaX = e.clientX - interaction.startX;
+            const deltaY = e.clientY - interaction.startY;
+            
+            // Requerir movimiento mínimo de 5px para iniciar drag (evita clicks accidentales)
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            if (distance < 5) return;
+            
+            // Marcar que hubo drag
+            dragOccurred = true;
+            
             const deltaMinutes = deltaX / state.zoom;
             const nodeIndex = state.nodes.findIndex(n => n.id === interaction.id);
             if (nodeIndex === -1) return;
@@ -978,6 +1041,10 @@
                         accumulatedHeight += areaHeight + 4; // +4 para el espacio entre áreas
                     }
                     
+                    // Marcar como posición manual si cambió de subcarril
+                    if (n.areaId !== targetAreaId || n.sublane !== targetSublane) {
+                        n.manualSublane = true;
+                    }
                     n.areaId = targetAreaId;
                     n.sublane = targetSublane;
                 }
@@ -1043,6 +1110,12 @@
             renderAll();
         }
 
+        function updateAreaColor(id, color) {
+            const area = state.areas.find(a => a.id === id);
+            if (area) area.color = color;
+            renderAll();
+        }
+
         function removeArea(id) {
             state.areas = state.areas.filter(a => a.id !== id);
             state.nodes = state.nodes.filter(n => n.areaId !== id);
@@ -1067,6 +1140,12 @@
             const canPaste = state.copiedNode !== null;
             
             menu.innerHTML = `
+                <div class="context-menu-item" onclick="openPropertiesModal('${nodeId}'); hideContextMenu();">
+                    <i class="ph ph-note-pencil"></i>
+                    <span>Editar</span>
+                    <span class="ml-auto text-xs text-slate-400">Doble click</span>
+                </div>
+                <div class="context-menu-divider"></div>
                 <div class="context-menu-item" onclick="copyNode(); hideContextMenu();">
                     <i class="ph ph-copy"></i>
                     <span>Copiar</span>
@@ -1120,13 +1199,26 @@
             state.selectedNodeId = newNode.id;
             renderAll();
             showToast("Actividad creada");
+            // Abrir modal automáticamente
+            setTimeout(() => openPropertiesModal(newNode.id), 100);
         }
 
         function updateNodeProp(prop, value, isTime = false) {
             const node = state.nodes.find(n => n.id === state.selectedNodeId);
             if (!node) return;
             node[prop] = isTime ? parseTime(value) : value;
-            renderAll();
+            
+            // Solo actualizar timeline y guardar, NO renderAll para mantener focus
+            renderTimeline();
+            saveData();
+            
+            // Si se cambió el color, actualizar el modal para reflejar selección visual
+            if (prop === 'color') {
+                const modalOverlay = document.getElementById('properties-modal-overlay');
+                if (modalOverlay.classList.contains('active')) {
+                    openPropertiesModal(state.selectedNodeId);
+                }
+            }
         }
 
         function deleteSelectedNode() {
@@ -1141,7 +1233,10 @@
             if (!node) return;
             if(!node.customFields) node.customFields = [];
             node.customFields.push({ id: 'cf' + Date.now(), key: 'Nueva Propiedad', value: '' });
-            renderAll();
+            
+            // Actualizar modal sin perder focus
+            openPropertiesModal(state.selectedNodeId);
+            saveData();
         }
 
         function updateCustomField(fieldId, prop, value) {
@@ -1156,7 +1251,10 @@
             const node = state.nodes.find(n => n.id === state.selectedNodeId);
             if (!node) return;
             node.customFields = node.customFields.filter(cf => cf.id !== fieldId);
-            renderAll();
+            
+            // Actualizar modal sin perder focus
+            openPropertiesModal(state.selectedNodeId);
+            saveData();
         }
 
         function exportToJson() {
