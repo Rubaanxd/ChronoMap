@@ -7,6 +7,12 @@ ChronoMap es una aplicación web interactiva para crear y gestionar líneas de t
 - **Gestión de Actividades**: Agrega, edita y elimina actividades en la línea de tiempo
 - **Interactividad**: Arrastra actividades para moverlas, usa los bordes para extender su duración
 - **Modal de Propiedades**: Doble click en actividad abre modal flotante con todos los detalles
+- **Sistema de Dependencias** ✨ NUEVO:
+  - Define relaciones entre actividades (predecesoras y sucesoras)
+  - Visualización gráfica con flechas en el timeline
+  - Detección automática de conflictos de tiempo
+  - Indicadores visuales de conflictos (rojo) vs dependencias válidas (gris)
+  - Gestión completa desde el modal de propiedades
 - **Subcarriles Dinámicos**: 
   - Detección automática de actividades solapadas
   - Reorganización manual arrastrando verticalmente
@@ -14,6 +20,7 @@ ChronoMap es una aplicación web interactiva para crear y gestionar líneas de t
 - **Diferenciador Visual de Áreas**:
   - Fondo de color suave en cada carril
   - Etiqueta con nombre del área visible
+  - Selector de color personalizable
 - **Panel Colapsable**: Panel de áreas colapsable para más espacio
 - **Copiar/Pegar**: 
   - Atajos de teclado (Ctrl+C / Ctrl+V)
@@ -26,7 +33,7 @@ ChronoMap es una aplicación web interactiva para crear y gestionar líneas de t
 - **Importación/Exportación**:
   - Importar proyectos desde archivos JSON
   - Exportar a JSON para guardar el progreso
-  - Exportar a PNG para compartir visualizaciones
+  - Exportar a PNG de alta calidad (con padding mejorado)
 - **Áreas Organizativas**: Organiza actividades en diferentes áreas/categorías
 - **Interfaz Moderna**: Diseño limpio con Tailwind CSS y Phosphor Icons
 
@@ -50,13 +57,21 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 
 ## 📋 Roadmap
 
-### Versión 1.2 (Actual)
+### Versión 1.3 (Actual) 🆕
+- ✅ Sistema de dependencias entre actividades
+- ✅ Visualización de relaciones con flechas SVG
+- ✅ Detección de conflictos de tiempo
+- ✅ Gestión de predecesoras y sucesoras en modal
+- ✅ Exportación PNG mejorada (sin texto cortado)
+- ✅ Limpieza automática de dependencias huérfanas
+
+### Versión 1.2
 - ✅ Modal de propiedades (doble click)
 - ✅ Diferenciador visual de áreas (fondo + etiqueta)
 - ✅ Panel de áreas colapsable
 - ✅ Zoom con Ctrl+Scroll (0.5x - 10x)
 - ✅ Botón limpiar lienzo con confirmación
-- ✅ Estructura base de undo/redo
+- ✅ Selector de color para áreas
 
 ### Versión 1.1
 - ✅ Sistema de subcarriles dinámicos
@@ -75,15 +90,16 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 - ✅ Exportación a PNG
 - ✅ Panel de áreas organizativas
 
-### Próximas Funcionalidades (Roadmap)
+### Próximas Funcionalidades (Roadmap v1.4+)
+- [ ] Ruta crítica automática (Critical Path Method)
+- [ ] Validación de dependencias circulares
+- [ ] Ajuste automático de tiempos según dependencias
 - [ ] UI para undo/redo (Ctrl+Z / Ctrl+Y)
 - [ ] Múltiples timelines en un mismo proyecto
-- [ ] Colaboración en tiempo real
 - [ ] Plantillas predefinidas
 - [ ] Modo oscuro
 - [ ] Más atajos de teclado
 - [ ] Filtros y búsqueda avanzada
-- [ ] Integración con calendarios externos
 - [ ] Exportar a PDF
 
 ## 🚀 Instalación y Uso
@@ -110,13 +126,19 @@ cd Timelines
 3. **Mover Actividad**: Arrastra la actividad horizontalmente
 4. **Cambiar Subcarril**: Arrastra la actividad verticalmente dentro del área
 5. **Extender Duración**: Arrastra desde los bordes de la actividad
-6. **Copiar/Pegar**: Selecciona actividad y usa Ctrl+C / Ctrl+V
-7. **Menú Contextual**: Click derecho sobre actividad para más opciones
-8. **Zoom**: Usa los controles +/- o Ctrl+Scroll del mouse
-9. **Colapsar Panel**: Click en botón de flecha en panel de áreas
-10. **Limpiar Lienzo**: Click en botón "Limpiar" (con confirmación)
-11. **Exportar**: Usa los botones JSON o PNG para guardar tu trabajo
-12. **Importar**: Click en "Importar" para cargar un archivo JSON previamente guardado
+6. **Gestionar Dependencias**:
+   - Abre el modal de propiedades (doble click)
+   - Sección "Predecesoras": Actividades que deben completarse antes
+   - Sección "Sucesoras": Actividades que dependen de esta
+   - Conflictos se marcan en rojo automáticamente
+   - Las flechas en el timeline muestran las relaciones
+7. **Copiar/Pegar**: Selecciona actividad y usa Ctrl+C / Ctrl+V
+8. **Menú Contextual**: Click derecho sobre actividad para más opciones
+9. **Zoom**: Usa los controles +/- o Ctrl+Scroll del mouse
+10. **Colapsar Panel**: Click en botón de flecha en panel de áreas
+11. **Limpiar Lienzo**: Click en botón "Limpiar" (con confirmación)
+12. **Exportar**: Usa los botones JSON o PNG para guardar tu trabajo
+13. **Importar**: Click en "Importar" para cargar un archivo JSON previamente guardado
 
 ## 📁 Estructura del Proyecto
 
@@ -146,4 +168,4 @@ Este proyecto está bajo la Licencia MIT.
 
 ---
 
-**Versión 1.2** - Mejoras visuales y UX: modal de propiedades, diferenciador de áreas, panel colapsable, zoom con scroll y limpiar lienzo.
+**Versión 1.3** - Sistema de Dependencias: relaciones entre actividades, visualización con flechas, detección de conflictos, exportación PNG mejorada.

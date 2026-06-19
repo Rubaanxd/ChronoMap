@@ -18,160 +18,54 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
-            overflow: hidden; /* Previene scroll general de la página */
+            overflow: hidden; 
         }
         
         /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         .grab-cursor { cursor: grab; }
         .grabbing-cursor { cursor: grabbing !important; }
         .resize-x-cursor { cursor: col-resize; }
         
         /* Context Menu */
-        .context-menu {
-            position: fixed;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            z-index: 1000;
-            min-width: 180px;
-            padding: 4px;
-        }
-        .context-menu-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.15s;
-        }
-        .context-menu-item:hover {
-            background-color: #f1f5f9;
-        }
-        .context-menu-item.danger:hover {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-        .context-menu-divider {
-            height: 1px;
-            background-color: #e2e8f0;
-            margin: 4px 0;
-        }
+        .context-menu { position: fixed; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px; padding: 4px; }
+        .context-menu-item { padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: all 0.15s; }
+        .context-menu-item:hover { background-color: #f1f5f9; }
+        .context-menu-item.danger:hover { background-color: #fee2e2; color: #dc2626; }
+        .context-menu-divider { height: 1px; background-color: #e2e8f0; margin: 4px 0; }
         
-        /* Sublane indicators */
-        .sublane-divider {
-            border-top: 1px dashed #e2e8f0;
-        }
+        /* Sublane & Modal styles */
+        .sublane-divider { border-top: 1px dashed #e2e8f0; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal { background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 500px; width: 90%; max-height: 85vh; overflow: hidden; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.active .modal { transform: scale(1); }
         
-        /* Modal styles */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .modal {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow: hidden;
-            transform: scale(0.9);
-            transition: transform 0.3s;
-        }
-        .modal-overlay.active .modal {
-            transform: scale(1);
-        }
-        
-        /* Area background and label */
-        .area-background {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            pointer-events: none;
-            opacity: 0.05;
-        }
-        .area-label {
-            position: sticky;
-            left: 12px;
-            top: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            z-index: 5;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Panel collapse */
-        .panel-collapsed {
-            width: 0 !important;
-            min-width: 0 !important;
-            overflow: hidden;
-        }
-        .collapse-btn {
-            position: absolute;
-            right: -12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 48px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 0 8px 8px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 25;
-            transition: all 0.2s;
-        }
-        .collapse-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
+        /* Area labels & panels */
+        .area-background { position: absolute; left: 0; right: 0; top: 0; bottom: 0; pointer-events: none; opacity: 0.05; }
+        .area-label { position: sticky; left: 12px; top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .panel-collapsed { width: 0 !important; min-width: 0 !important; overflow: hidden; }
+        .collapse-btn { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 24px; height: 48px; background: white; border: 1px solid #e2e8f0; border-radius: 0 8px 8px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 25; transition: all 0.2s; }
+        .collapse-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
     </style>
 </head>
 <body class="flex flex-col h-screen text-slate-900 selection:bg-blue-100">
+
+    <!-- SVGs para las flechas de dependencias -->
+    <svg width="0" height="0" class="absolute pointer-events-none">
+        <defs>
+            <marker id="arrow-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+            </marker>
+            <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+            </marker>
+        </defs>
+    </svg>
 
     <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/80 shrink-0 shadow-sm z-30">
         <div class="flex items-center space-x-3">
@@ -210,11 +104,10 @@
         </button>
         <div class="w-px h-4 bg-slate-300"></div>
         <span class="text-xs text-slate-500 hidden sm:flex items-center">
-            <i class="ph ph-dots-six-vertical mr-1 opacity-50"></i> Arrastra para mover • Usa los bordes para extender
+            <i class="ph ph-dots-six-vertical mr-1 opacity-50"></i> Arrastra para mover • Doble clic para editar propiedades y dependencias
         </span>
         <div class="flex-1"></div>
         
-        <!-- Controles de Zoom -->
         <div class="flex items-center space-x-1 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
             <button onclick="changeZoom(-0.5)" class="p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-md transition-colors" title="Alejar">
                 <i class="ph ph-magnifying-glass-minus text-lg"></i>
@@ -227,7 +120,6 @@
     </div>
 
     <div class="flex flex-1 overflow-hidden relative">
-        <!-- Panel Izquierdo: Áreas -->
         <div id="areas-panel" class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-[4px_0_12px_rgba(0,0,0,0.02)] transition-all duration-300 relative">
             <button id="collapse-panel-btn" class="collapse-btn" onclick="togglePanel()" title="Colapsar/Expandir panel">
                 <i id="collapse-icon" class="ph ph-caret-left text-slate-500"></i>
@@ -237,32 +129,23 @@
                     <i class="ph ph-briefcase"></i> Áreas
                 </span>
             </div>
-            <div id="areas-container" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1">
-                <!-- Las áreas se renderizan aquí -->
-            </div>
+            <div id="areas-container" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1"></div>
         </div>
 
-        <!-- Contenedor Timeline -->
         <div id="scroll-container" class="flex-1 overflow-auto bg-[#f8fafc] relative custom-scrollbar">
-            <!-- Este ID es clave para la exportación a imagen -->
             <div id="timeline-wrapper" class="relative pb-20 bg-[#f8fafc]">
-                <!-- Regla de tiempo (Ruler) -->
                 <div id="time-ruler" class="h-10 border-b border-slate-200 bg-white sticky top-0 z-10 flex shadow-sm"></div>
-                <!-- Líneas de cuadrícula -->
                 <div id="grid-lines" class="absolute top-0 left-0 bottom-0 right-0 pointer-events-none flex"></div>
-                <!-- Carriles y Nodos -->
                 <div id="lanes-container" class="relative mt-3 px-3 space-y-1"></div>
             </div>
         </div>
     </div>
 
-    <!-- Mensaje Toast (Reemplazo de Alert) -->
     <div id="toast-message" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-lg shadow-xl font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2">
         <i class="ph ph-info text-lg text-blue-400"></i>
         <span id="toast-text">Mensaje</span>
     </div>
 
-    <!-- Pantalla de Carga (Bloquea interacciones durante procesos pesados) -->
     <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4">
             <i class="ph ph-spinner-gap animate-spin text-blue-600 text-4xl mb-4"></i>
@@ -271,21 +154,14 @@
         </div>
     </div>
 
-    <!-- Context Menu -->
-    <div id="context-menu" class="context-menu hidden">
-        <!-- Se llena dinámicamente -->
-    </div>
+    <div id="context-menu" class="context-menu hidden"></div>
 
-    <!-- Modal de Propiedades -->
     <div id="properties-modal-overlay" class="modal-overlay">
         <div class="modal">
-            <div id="properties-modal-content">
-                <!-- Se llena dinámicamente -->
-            </div>
+            <div id="properties-modal-content"></div>
         </div>
     </div>
 
-    <!-- Modal de Confirmación -->
     <div id="confirmation-modal-overlay" class="modal-overlay">
         <div class="modal" style="max-width: 400px;">
             <div class="p-6">
@@ -297,41 +173,28 @@
                 </div>
                 <p id="confirmation-message" class="text-sm text-slate-600 mb-6">¿Estás seguro?</p>
                 <div class="flex gap-3 justify-end">
-                    <button onclick="closeConfirmationModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
-                        Cancelar
-                    </button>
-                    <button id="confirmation-confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                        Confirmar
-                    </button>
+                    <button onclick="closeConfirmationModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Cancelar</button>
+                    <button id="confirmation-confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">Confirmar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONSTANTES ---
-        const TOTAL_MINUTES = 24 * 60; // 1440
+        const TOTAL_MINUTES = 24 * 60;
         const SNAP_MINUTES = 15;
 
-        // --- ESTADO GLOBAL ---
         let state = {
             areas: [],
             nodes: [],
-            zoom: 2, // pixelsPerMinute
+            zoom: 2,
             selectedNodeId: null,
-            copiedNode: null, // Para copiar/pegar
-            isPanelCollapsed: false, // Estado del panel de áreas
-            history: {
-                past: [],
-                future: [],
-                maxSize: 50
-            }
+            copiedNode: null,
+            isPanelCollapsed: false
         };
 
-        // Estado de Interacción (Drag & Drop)
         let interaction = null;
 
-        // --- INICIALIZACIÓN ---
         function init() {
             loadData();
             setupEventListeners();
@@ -355,19 +218,19 @@
 
             if (savedNodes) {
                 state.nodes = JSON.parse(savedNodes);
-                // Asegurar que todos los nodos tengan sublane
                 state.nodes.forEach(n => {
                     if (n.sublane === undefined) n.sublane = 0;
+                    if (n.dependencies === undefined) n.dependencies = []; // Asegurar array dependencias
                 });
             } else {
                 state.nodes = [
-                    { id: 'n1', name: 'Revisión matutina', startTime: 480, endTime: 540, areaId: 'a1', color: '#eff6ff', description: 'Revisión de métricas', customFields: [], sublane: 0 },
-                    { id: 'n2', name: 'Proceso Batch', startTime: 600, endTime: 720, areaId: 'a2', color: '#ecfdf5', description: '', customFields: [{ id: 'cf1', key: 'Ticket', value: 'B-102' }], sublane: 0 }
+                    { id: 'n1', name: 'Revisión matutina', startTime: 480, endTime: 540, areaId: 'a1', color: '#eff6ff', description: 'Revisión de métricas', customFields: [], sublane: 0, dependencies: [] },
+                    // Dependencia de ejemplo: Batch depende de Revisión matutina
+                    { id: 'n2', name: 'Proceso Batch', startTime: 600, endTime: 720, areaId: 'a2', color: '#ecfdf5', description: '', customFields: [{ id: 'cf1', key: 'Ticket', value: 'B-102' }], sublane: 0, dependencies: ['n1'] }
                 ];
             }
 
             if (savedZoom) state.zoom = parseFloat(savedZoom);
-            
             const savedPanelState = localStorage.getItem('chronomap_panel_collapsed_vanilla');
             if (savedPanelState) state.isPanelCollapsed = savedPanelState === 'true';
         }
@@ -387,9 +250,7 @@
         function parseTime(timeString) {
             if(!timeString) return 0;
             const parts = timeString.split(':');
-            const h = parseInt(parts[0], 10) || 0;
-            const m = parseInt(parts[1], 10) || 0;
-            return (h * 60) + m;
+            return (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
         }
 
         function showToast(msg) {
@@ -401,87 +262,56 @@
 
         function showLoading(msg) {
             document.getElementById('loading-text').innerText = msg || 'Cargando...';
-            const overlay = document.getElementById('loading-overlay');
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-            overlay.classList.add('opacity-100');
+            document.getElementById('loading-overlay').classList.remove('opacity-0', 'pointer-events-none');
         }
 
         function hideLoading() {
-            const overlay = document.getElementById('loading-overlay');
-            overlay.classList.remove('opacity-100');
-            overlay.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('loading-overlay').classList.add('opacity-0', 'pointer-events-none');
         }
 
-        // --- SISTEMA DE SUBCARRILES ---
         function calculateSublanes(areaId) {
             const nodesInArea = state.nodes.filter(n => n.areaId === areaId);
             if (nodesInArea.length === 0) return 1;
 
-            // Separar nodos con posición manual vs automática
             const manualNodes = nodesInArea.filter(n => n.manualSublane === true);
             const autoNodes = nodesInArea.filter(n => !n.manualSublane);
 
-            // Ordenar nodos automáticos por startTime, luego por endTime
-            autoNodes.sort((a, b) => {
-                if (a.startTime !== b.startTime) return a.startTime - b.startTime;
-                return a.endTime - b.endTime;
-            });
+            autoNodes.sort((a, b) => a.startTime === b.startTime ? a.endTime - b.endTime : a.startTime - b.startTime);
 
-            // Inicializar subcarriles con nodos manuales
             const sublanes = [];
             manualNodes.forEach(node => {
-                const sublaneIndex = node.sublane || 0;
-                if (!sublanes[sublaneIndex]) sublanes[sublaneIndex] = [];
-                sublanes[sublaneIndex].push(node);
+                const idx = node.sublane || 0;
+                if (!sublanes[idx]) sublanes[idx] = [];
+                sublanes[idx].push(node);
             });
             
-            // Asignar nodos automáticos
             autoNodes.forEach(node => {
-                let assignedSublane = -1;
-                
-                // Buscar el primer subcarril donde NO haya colisión
-                for (let i = 0; i < 100; i++) { // Máximo 100 subcarriles
+                let assigned = -1;
+                for (let i = 0; i < 100; i++) {
                     if (!sublanes[i]) sublanes[i] = [];
-                    
-                    // Verificar si hay colisión con CUALQUIER nodo en este subcarril
-                    const hasCollision = sublanes[i].some(existingNode => {
-                        // Hay colisión si los rangos se solapan
-                        return !(existingNode.endTime <= node.startTime || existingNode.startTime >= node.endTime);
-                    });
-                    
-                    if (!hasCollision) {
-                        assignedSublane = i;
+                    const collision = sublanes[i].some(ex => !(ex.endTime <= node.startTime || ex.startTime >= node.endTime));
+                    if (!collision) {
+                        assigned = i;
                         sublanes[i].push(node);
                         break;
                     }
                 }
-                
-                // Asignar subcarril al nodo
-                if (assignedSublane !== -1) {
-                    node.sublane = assignedSublane;
-                } else {
-                    // Fallback: asignar al final
-                    node.sublane = sublanes.length;
-                    sublanes.push([node]);
-                }
+                node.sublane = assigned !== -1 ? assigned : sublanes.length;
+                if(assigned === -1) sublanes.push([node]);
             });
 
-            // Compactar subcarriles vacíos
-            const compactedSublanes = sublanes.filter(s => s && s.length > 0);
-            return Math.max(compactedSublanes.length, 1);
+            return Math.max(sublanes.filter(s => s && s.length > 0).length, 1);
         }
 
         function getAreaSublaneCount(areaId) {
-            const nodesInArea = state.nodes.filter(n => n.areaId === areaId);
-            if (nodesInArea.length === 0) return 1;
-            return Math.max(...nodesInArea.map(n => n.sublane || 0)) + 1;
+            const nodes = state.nodes.filter(n => n.areaId === areaId);
+            return nodes.length === 0 ? 1 : Math.max(...nodes.map(n => n.sublane || 0)) + 1;
         }
 
         function renderAll() {
             document.getElementById('timeline-wrapper').style.width = `${TOTAL_MINUTES * state.zoom}px`;
             document.getElementById('zoom-label').innerText = `${Math.round(state.zoom * 50)}%`;
             
-            // Aplicar estado del panel
             const panel = document.getElementById('areas-panel');
             const icon = document.getElementById('collapse-icon');
             if (state.isPanelCollapsed) {
@@ -500,94 +330,82 @@
         }
 
         function renderAreas() {
-            const container = document.getElementById('areas-container');
             let html = '';
-            
             state.areas.forEach(area => {
                 html += `
                 <div class="group flex items-center h-16 bg-white border border-slate-100 hover:border-slate-200 rounded-xl px-3 transition-all hover:shadow-sm">
-                    <input type="color" value="${area.color}" onchange="updateAreaColor('${area.id}', this.value)" class="w-6 h-6 rounded-md mr-3 shrink-0 cursor-pointer border-0" title="Cambiar color" />
+                    <input type="color" value="${area.color}" onchange="updateAreaColor('${area.id}', this.value)" class="w-6 h-6 rounded-md mr-3 shrink-0 cursor-pointer border-0" />
                     <input type="text" value="${area.name}" onchange="updateArea('${area.id}', this.value)" class="font-medium text-sm text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 w-full" />
-                    <button onclick="removeArea('${area.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0 ml-1" title="Eliminar Área">
-                        <i class="ph ph-trash text-base"></i>
-                    </button>
+                    <button onclick="removeArea('${area.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0 ml-1"><i class="ph ph-trash text-base"></i></button>
                 </div>`;
             });
-            
-            html += `<button onclick="addArea()" class="w-full mt-2 py-3 text-sm text-slate-500 hover:text-blue-600 font-medium hover:bg-blue-50/50 rounded-xl border border-dashed border-slate-200 hover:border-blue-200 flex items-center justify-center transition-all">
-                        <i class="ph ph-plus mr-1"></i> Añadir Área
-                    </button>`;
-            container.innerHTML = html;
+            html += `<button onclick="addArea()" class="w-full mt-2 py-3 text-sm text-slate-500 hover:text-blue-600 font-medium hover:bg-blue-50/50 rounded-xl border border-dashed border-slate-200 hover:border-blue-200 flex items-center justify-center transition-all"><i class="ph ph-plus mr-1"></i> Añadir Área</button>`;
+            document.getElementById('areas-container').innerHTML = html;
         }
 
         function renderRuler() {
-            const container = document.getElementById('time-ruler');
             let html = '';
             for (let i = 0; i < 24; i++) {
                 let marks = '';
                 if (state.zoom >= 1.5) marks += `<div class="absolute bottom-0 left-1/4 w-px h-1.5 bg-slate-200"></div>`;
                 if (state.zoom >= 0.8) marks += `<div class="absolute bottom-0 left-2/4 w-px h-2.5 bg-slate-300"></div>`;
                 if (state.zoom >= 1.5) marks += `<div class="absolute bottom-0 left-3/4 w-px h-1.5 bg-slate-200"></div>`;
-                
-                html += `
-                <div class="h-full border-r border-slate-100 relative flex items-end px-1.5 pb-1.5" style="width: ${60 * state.zoom}px">
-                    <span class="text-[10px] font-bold text-slate-400 select-none">${i.toString().padStart(2, '0')}:00</span>
-                    ${marks}
-                </div>`;
+                html += `<div class="h-full border-r border-slate-100 relative flex items-end px-1.5 pb-1.5" style="width: ${60 * state.zoom}px"><span class="text-[10px] font-bold text-slate-400 select-none">${i.toString().padStart(2, '0')}:00</span>${marks}</div>`;
             }
-            container.innerHTML = html;
+            document.getElementById('time-ruler').innerHTML = html;
         }
 
         function renderGrid() {
-            const container = document.getElementById('grid-lines');
             let html = '';
             for (let i = 0; i < 24; i++) {
                 html += `<div class="border-r border-slate-200/60 border-dashed h-full" style="width: ${60 * state.zoom}px"></div>`;
             }
-            container.innerHTML = html;
+            document.getElementById('grid-lines').innerHTML = html;
         }
 
         function renderTimeline() {
             const container = document.getElementById('lanes-container');
             let html = '';
             
+            // 1. Preparar posiciones absolutas para las dependencias
+            const nodePositions = {};
+            let accumulatedHeight = 0;
+
             state.areas.forEach(area => {
-                // Calcular subcarriles automáticamente
                 calculateSublanes(area.id);
                 const sublaneCount = getAreaSublaneCount(area.id);
-                const sublaneHeight = 60; // Altura de cada subcarril
-                const areaHeight = sublaneCount * sublaneHeight + 16; // +16 para padding
+                const sublaneHeight = 60; 
+                const areaHeight = Math.max(sublaneCount * sublaneHeight + 16, 76);
                 
                 const nodesInArea = state.nodes.filter(n => n.areaId === area.id);
+                
+                // Guardar posiciones para dibujar las líneas
+                nodesInArea.forEach(node => {
+                    nodePositions[node.id] = {
+                        x1: node.startTime * state.zoom,
+                        x2: node.endTime * state.zoom,
+                        y: accumulatedHeight + ((node.sublane || 0) * sublaneHeight) + 8 + 22 // 22 es la mitad del alto del nodo (44/2)
+                    };
+                });
+
                 let nodesHtml = nodesInArea.map(node => {
                     const width = (node.endTime - node.startTime) * state.zoom;
                     const left = node.startTime * state.zoom;
                     const isSelected = state.selectedNodeId === node.id;
                     const isInteracting = interaction && interaction.id === node.id;
+                    const top = (node.sublane || 0) * sublaneHeight + 8;
                     
-                    // Posicionamiento vertical basado en sublane
-                    const sublane = node.sublane || 0;
-                    const top = sublane * sublaneHeight + 8;
-                    const height = sublaneHeight - 16;
-                    
-                    let classes = "absolute rounded-xl flex flex-col p-2.5 overflow-hidden transition-all duration-75 select-none group grab-cursor ";
-                    if (isSelected) classes += "ring-2 ring-blue-500 ring-offset-1 shadow-md z-10 ";
+                    let classes = "absolute rounded-xl flex flex-col p-2.5 overflow-hidden transition-all duration-75 select-none group grab-cursor z-10 ";
+                    if (isSelected) classes += "ring-2 ring-blue-500 ring-offset-1 shadow-md ";
                     else classes += "border border-slate-200/60 shadow-sm hover:shadow-md hover:border-slate-300 ";
                     if (isInteracting) classes += "opacity-90 scale-[1.02] shadow-xl z-20 grabbing-cursor";
 
-                    let resizeHandles = '';
-                    if (isSelected) {
-                        resizeHandles = `
-                        <div class="absolute left-0 top-0 bottom-0 w-3 resize-x-cursor hover:bg-blue-500/10 flex items-center justify-center group/handle" onmousedown="startInteraction(event, '${node.id}', 'resize-left')">
-                            <div class="w-1 h-4 rounded-full bg-blue-400 opacity-0 group-hover/handle:opacity-100 transition-opacity"></div>
-                        </div>
-                        <div class="absolute right-0 top-0 bottom-0 w-3 resize-x-cursor hover:bg-blue-500/10 flex items-center justify-center group/handle" onmousedown="startInteraction(event, '${node.id}', 'resize-right')">
-                            <div class="w-1 h-4 rounded-full bg-blue-400 opacity-0 group-hover/handle:opacity-100 transition-opacity"></div>
-                        </div>`;
-                    }
+                    let handles = isSelected ? `
+                        <div class="absolute left-0 top-0 bottom-0 w-3 resize-x-cursor hover:bg-blue-500/10 flex items-center justify-center" onmousedown="startInteraction(event, '${node.id}', 'resize-left')"><div class="w-1 h-4 rounded-full bg-blue-400 opacity-0 group-hover:opacity-100"></div></div>
+                        <div class="absolute right-0 top-0 bottom-0 w-3 resize-x-cursor hover:bg-blue-500/10 flex items-center justify-center" onmousedown="startInteraction(event, '${node.id}', 'resize-right')"><div class="w-1 h-4 rounded-full bg-blue-400 opacity-0 group-hover:opacity-100"></div></div>` : '';
 
                     return `
-                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')" onmouseup="handleNodeClick(event, '${node.id}')" oncontextmenu="showContextMenu(event, '${node.id}')">
+                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; top: ${top}px; width: ${width}px; height: 44px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')" onmouseup="handleNodeClick(event, '${node.id}')" oncontextmenu="showContextMenu(event, '${node.id}')">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 pointer-events-none" style="background-color: ${area.color}"></div>
                         <div class="flex items-center justify-between mb-1 pointer-events-none pl-1">
                             <span class="text-xs font-bold text-slate-700 truncate pr-2">${node.name}</span>
@@ -595,29 +413,52 @@
                         <div class="flex items-center text-[10px] text-slate-500 font-medium pointer-events-none pl-1">
                             <i class="ph ph-clock mr-1 opacity-70"></i> ${formatTime(node.startTime)} - ${formatTime(node.endTime)}
                         </div>
-                        ${resizeHandles}
+                        ${handles}
                     </div>`;
                 }).join('');
 
-                // Generar divisores de subcarriles
-                let sublanesDividers = '';
-                for (let i = 1; i < sublaneCount; i++) {
-                    const dividerTop = i * sublaneHeight + 8;
-                    sublanesDividers += `<div class="absolute left-0 right-0 sublane-divider" style="top: ${dividerTop}px;"></div>`;
-                }
+                let dividers = '';
+                for (let i = 1; i < sublaneCount; i++) dividers += `<div class="absolute left-0 right-0 sublane-divider" style="top: ${i * sublaneHeight + 8}px;"></div>`;
 
-                // Fondo de color del área
-                const areaBackground = `<div class="area-background" style="background-color: ${area.color};"></div>`;
-                
-                // Etiqueta del área
-                const areaLabel = `<div class="area-label" style="color: ${area.color};"><i class="ph-fill ph-circle" style="font-size: 8px;"></i>${area.name}</div>`;
-
-                html += `<div class="relative rounded-xl border border-transparent hover:border-slate-200/50 transition-all" style="height: ${areaHeight}px; min-height: 76px;" data-area-id="${area.id}">${areaBackground}${areaLabel}${sublanesDividers}${nodesHtml}</div>`;
+                html += `<div class="relative rounded-xl border border-transparent hover:border-slate-200/50 transition-all" style="height: ${areaHeight}px; min-height: 76px;" data-area-id="${area.id}">
+                            <div class="area-background" style="background-color: ${area.color};"></div>
+                            <div class="area-label" style="color: ${area.color};"><i class="ph-fill ph-circle" style="font-size: 8px;"></i>${area.name}</div>
+                            ${dividers}${nodesHtml}
+                         </div>`;
+                         
+                accumulatedHeight += areaHeight + 4; // +4 del space-y-1
             });
-            container.innerHTML = html;
-        }
 
-        // renderPropertiesPanel eliminado - ahora se usa modal
+            // 2. Renderizar SVG de Dependencias
+            let svgPaths = '';
+            state.nodes.forEach(node => {
+                if (!node.dependencies) return;
+                node.dependencies.forEach(depId => {
+                    const fromPos = nodePositions[depId]; // Origen = Tarea predecesora
+                    const toPos = nodePositions[node.id]; // Destino = Tarea actual
+                    
+                    if (fromPos && toPos) {
+                        const sX = fromPos.x2; // Final de la tarea origen
+                        const sY = fromPos.y;
+                        const eX = toPos.x1;   // Inicio de la tarea destino
+                        const eY = toPos.y;
+                        
+                        // ¿Hay conflicto de tiempo? (Destino empieza antes de que el origen termine)
+                        const hasConflict = state.nodes.find(n=>n.id===depId).endTime > node.startTime;
+                        
+                        const stroke = hasConflict ? 'stroke-red-500' : 'stroke-slate-400';
+                        const marker = hasConflict ? 'url(#arrow-red)' : 'url(#arrow-slate)';
+                        const dash = hasConflict ? 'stroke-dasharray="4,4"' : '';
+                        
+                        svgPaths += `<path d="M ${sX} ${sY} C ${sX + 30} ${sY}, ${eX - 30} ${eY}, ${eX} ${eY}" fill="none" stroke-width="2" class="${stroke} transition-all duration-200" marker-end="${marker}" ${dash} />`;
+                    }
+                });
+            });
+
+            const svgLayer = `<svg class="absolute top-0 pointer-events-none z-[5]" style="left: 12px; width: calc(100% - 24px); height: ${accumulatedHeight}px;">${svgPaths}</svg>`;
+            
+            container.innerHTML = svgLayer + html;
+        }
 
         function setupEventListeners() {
             document.addEventListener('mousemove', handleMouseMove);
@@ -625,73 +466,40 @@
             document.getElementById('scroll-container').addEventListener('mousedown', (e) => {
                 if (e.target.id === 'scroll-container' || e.target.id === 'timeline-wrapper') selectNode(null);
             });
-            
             document.getElementById('file-input').addEventListener('change', importFromJson);
-            
-            // Copiar/Pegar con teclado
             document.addEventListener('keydown', handleKeyboard);
-            
-            // Cerrar menú contextual al hacer click fuera
             document.addEventListener('click', hideContextMenu);
-            
-            // Zoom con Ctrl+Scroll
             document.getElementById('scroll-container').addEventListener('wheel', handleZoomScroll, { passive: false });
-            
-            // Cerrar modal con click en overlay
             document.getElementById('properties-modal-overlay').addEventListener('click', (e) => {
                 if (e.target.id === 'properties-modal-overlay') closePropertiesModal();
             });
         }
 
         function handleKeyboard(e) {
-            // ESC - Cerrar modal
-            if (e.key === 'Escape') {
-                closePropertiesModal();
-                closeConfirmationModal();
-            }
-            // Ctrl+C - Copiar
-            if (e.ctrlKey && e.key === 'c' && state.selectedNodeId) {
-                e.preventDefault();
-                copyNode();
-            }
-            // Ctrl+V - Pegar
-            if (e.ctrlKey && e.key === 'v' && state.copiedNode) {
-                e.preventDefault();
-                pasteNode();
-            }
-            // Delete - Eliminar
-            if (e.key === 'Delete' && state.selectedNodeId) {
-                e.preventDefault();
-                deleteSelectedNode();
-            }
+            if (e.key === 'Escape') { closePropertiesModal(); closeConfirmationModal(); }
+            if (e.ctrlKey && e.key === 'c' && state.selectedNodeId) { e.preventDefault(); copyNode(); }
+            if (e.ctrlKey && e.key === 'v' && state.copiedNode) { e.preventDefault(); pasteNode(); }
+            if (e.key === 'Delete' && state.selectedNodeId) { e.preventDefault(); deleteSelectedNode(); }
         }
 
         function copyNode() {
             const node = state.nodes.find(n => n.id === state.selectedNodeId);
             if (!node) return;
-            
             state.copiedNode = JSON.parse(JSON.stringify(node));
             showToast('✅ Actividad copiada');
         }
 
         function pasteNode() {
             if (!state.copiedNode) return;
-            
             const newNode = JSON.parse(JSON.stringify(state.copiedNode));
             newNode.id = 'n' + Date.now();
             newNode.name = newNode.name + ' (Copia)';
-            
-            // Desplazar 15 minutos para evitar solapamiento exacto
-            newNode.startTime += 15;
-            newNode.endTime += 15;
-            
-            // Ajustar si se pasa del límite
+            newNode.startTime += 15; newNode.endTime += 15;
+            newNode.dependencies = []; // Las copias no heredan dependencias por seguridad
             if (newNode.endTime > TOTAL_MINUTES) {
-                const duration = newNode.endTime - newNode.startTime;
-                newNode.endTime = TOTAL_MINUTES;
-                newNode.startTime = TOTAL_MINUTES - duration;
+                const dur = newNode.endTime - newNode.startTime;
+                newNode.endTime = TOTAL_MINUTES; newNode.startTime = TOTAL_MINUTES - dur;
             }
-            
             state.nodes.push(newNode);
             state.selectedNodeId = newNode.id;
             renderAll();
@@ -701,43 +509,76 @@
         function duplicateNode(nodeId) {
             const node = state.nodes.find(n => n.id === nodeId);
             if (!node) return;
-            
             const newNode = JSON.parse(JSON.stringify(node));
             newNode.id = 'n' + Date.now();
             newNode.name = newNode.name + ' (Duplicado)';
-            newNode.startTime += 15;
-            newNode.endTime += 15;
-            
-            if (newNode.endTime > TOTAL_MINUTES) {
-                const duration = newNode.endTime - newNode.startTime;
-                newNode.endTime = TOTAL_MINUTES;
-                newNode.startTime = TOTAL_MINUTES - duration;
-            }
-            
+            newNode.startTime += 15; newNode.endTime += 15;
+            newNode.dependencies = [];
             state.nodes.push(newNode);
             state.selectedNodeId = newNode.id;
             renderAll();
             showToast('✅ Actividad duplicada');
         }
 
-        // --- MODAL DE PROPIEDADES ---
+        // --- SISTEMA DE DEPENDENCIAS EN MODAL ---
+        function addDependency(nodeId) {
+            const select = document.getElementById('new-dep-select');
+            const targetId = select.value;
+            if (!targetId) return;
+            
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node.dependencies) node.dependencies = [];
+            if (!node.dependencies.includes(targetId)) {
+                node.dependencies.push(targetId);
+                saveData();
+                openPropertiesModal(nodeId); 
+                renderAll();
+            }
+        }
+
+        function removeDependency(nodeId, depId) {
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node || !node.dependencies) return;
+            node.dependencies = node.dependencies.filter(id => id !== depId);
+            saveData();
+            openPropertiesModal(nodeId);
+            renderAll();
+        }
+
+        function addSuccessor(nodeId) {
+            const select = document.getElementById('new-succ-select');
+            const targetId = select.value;
+            if (!targetId) return;
+            
+            const targetNode = state.nodes.find(n => n.id === targetId);
+            if (!targetNode) return;
+            
+            if (!targetNode.dependencies) targetNode.dependencies = [];
+            if (!targetNode.dependencies.includes(nodeId)) {
+                targetNode.dependencies.push(nodeId);
+                saveData();
+                openPropertiesModal(nodeId); 
+                renderAll();
+            }
+        }
+
+        function removeSuccessor(nodeId, targetId) {
+            const targetNode = state.nodes.find(n => n.id === targetId);
+            if (!targetNode || !targetNode.dependencies) return;
+            targetNode.dependencies = targetNode.dependencies.filter(id => id !== nodeId);
+            saveData();
+            openPropertiesModal(nodeId);
+            renderAll();
+        }
+
         function openPropertiesModal(nodeId) {
             const node = state.nodes.find(n => n.id === nodeId);
             if (!node) return;
-            
-            // Cancelar cualquier interacción de drag
             interaction = null;
-            
             state.selectedNodeId = nodeId;
             
-            const overlay = document.getElementById('properties-modal-overlay');
-            const content = document.getElementById('properties-modal-content');
-            
             let areaOptions = state.areas.map(a => `<option value="${a.id}" ${node.areaId === a.id ? 'selected' : ''}>${a.name}</option>`).join('');
-            
-            let colorButtons = ['#ffffff', '#eff6ff', '#ecfdf5', '#fef2f2', '#fefce8', '#f5f3ff'].map(c => `
-                <button onclick="updateNodeProp('color', '${c}')" class="w-8 h-8 rounded-full border-2 transition-all ${node.color === c ? 'border-blue-500 scale-110 shadow-sm' : 'border-slate-200 hover:scale-105'}" style="background-color: ${c}"></button>
-            `).join('');
+            let colorButtons = ['#ffffff', '#eff6ff', '#ecfdf5', '#fef2f2', '#fefce8', '#f5f3ff'].map(c => `<button onclick="updateNodeProp('color', '${c}')" class="w-8 h-8 rounded-full border-2 transition-all ${node.color === c ? 'border-blue-500 scale-110 shadow-sm' : 'border-slate-200 hover:scale-105'}" style="background-color: ${c}"></button>`).join('');
 
             let customFieldsHtml = (node.customFields || []).map(cf => `
                 <div class="flex space-x-2 items-start group">
@@ -748,18 +589,50 @@
                     <button onclick="removeCustomField('${cf.id}')" class="mt-6 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"><i class="ph ph-trash"></i></button>
                 </div>
             `).join('');
+            if(customFieldsHtml === '') customFieldsHtml = `<div class="text-xs text-slate-400 italic text-center p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">No hay propiedades adicionales.</div>`;
 
-            if(customFieldsHtml === '') {
-                customFieldsHtml = `<div class="text-xs text-slate-400 italic text-center p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">No hay propiedades adicionales.</div>`;
-            }
+            // --- PREDECESORAS ---
+            const availableDeps = state.nodes.filter(n => n.id !== node.id && !(node.dependencies || []).includes(n.id));
+            let depOptionsHtml = availableDeps.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
+            
+            let activeDepsHtml = (node.dependencies || []).map(depId => {
+                const depNode = state.nodes.find(n => n.id === depId);
+                if(!depNode) return '';
+                const hasConflict = depNode.endTime > node.startTime;
+                return `
+                    <div class="flex items-center justify-between bg-white border ${hasConflict ? 'border-red-300 bg-red-50' : 'border-slate-200'} p-2 rounded text-xs mb-1">
+                        <span class="truncate pr-2 font-medium ${hasConflict ? 'text-red-700' : 'text-slate-700'}" title="${depNode.name}">${depNode.name}</span>
+                        ${hasConflict ? `<i class="ph-fill ph-warning-circle text-red-500 ml-auto mr-2 shrink-0" title="Conflicto: Termina después de que esta inicie"></i>` : ''}
+                        <button onclick="removeDependency('${node.id}', '${depId}')" class="text-slate-400 hover:text-red-600 shrink-0"><i class="ph ph-trash"></i></button>
+                    </div>
+                `;
+            }).join('');
+            if(activeDepsHtml === '') activeDepsHtml = `<div class="text-[10px] text-slate-400 italic mb-2">Sin predecesoras.</div>`;
 
-            content.innerHTML = `
+            // --- SUCESORAS ---
+            const activeSuccessors = state.nodes.filter(n => (n.dependencies || []).includes(node.id));
+            let activeSuccHtml = activeSuccessors.map(succNode => {
+                const hasConflict = succNode.startTime < node.endTime;
+                return `
+                    <div class="flex items-center justify-between bg-white border ${hasConflict ? 'border-red-300 bg-red-50' : 'border-slate-200'} p-2 rounded text-xs mb-1">
+                        <span class="truncate pr-2 font-medium ${hasConflict ? 'text-red-700' : 'text-slate-700'}" title="${succNode.name}">${succNode.name}</span>
+                        ${hasConflict ? `<i class="ph-fill ph-warning-circle text-red-500 ml-auto mr-2 shrink-0" title="Conflicto: Inicia antes de que esta termine"></i>` : ''}
+                        <button onclick="removeSuccessor('${node.id}', '${succNode.id}')" class="text-slate-400 hover:text-red-600 shrink-0"><i class="ph ph-trash"></i></button>
+                    </div>
+                `;
+            }).join('');
+            if(activeSuccHtml === '') activeSuccHtml = `<div class="text-[10px] text-slate-400 italic mb-2">Sin sucesoras.</div>`;
+
+            const availableSucc = state.nodes.filter(n => n.id !== node.id && !(n.dependencies || []).includes(node.id) && !activeSuccessors.find(s => s.id === n.id));
+            let succOptionsHtml = availableSucc.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
+
+            document.getElementById('properties-modal-content').innerHTML = `
                 <div class="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
                     <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="ph ph-sliders"></i> Detalles de Actividad</h2>
                     <button onclick="closePropertiesModal()" class="text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 p-1 rounded-md transition-colors"><i class="ph ph-x"></i></button>
                 </div>
                 
-                <div class="p-5 space-y-6 overflow-y-auto flex-1 custom-scrollbar" style="max-height: calc(80vh - 140px);">
+                <div class="p-5 space-y-6 overflow-y-auto flex-1 custom-scrollbar" style="max-height: calc(85vh - 140px);">
                     <div class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre</label>
@@ -788,8 +661,36 @@
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Color</label>
                         <div class="flex gap-2">${colorButtons}</div>
                     </div>
+                    
+                    <div class="border-t border-slate-100 pt-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1"><i class="ph ph-arrow-bend-down-right"></i> Predecesoras</label>
+                                <div class="mb-2 max-h-32 overflow-y-auto custom-scrollbar pr-1">${activeDepsHtml}</div>
+                                <div class="flex flex-col gap-2">
+                                    <select id="new-dep-select" class="w-full text-xs p-2 border border-slate-200 rounded-lg bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500/20">
+                                        <option value="">Añadir previa...</option>
+                                        ${depOptionsHtml}
+                                    </select>
+                                    <button onclick="addDependency('${node.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors w-full border border-blue-100">Vincular</button>
+                                </div>
+                            </div>
 
-                    <div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1"><i class="ph ph-arrow-bend-right-down"></i> Sucesoras</label>
+                                <div class="mb-2 max-h-32 overflow-y-auto custom-scrollbar pr-1">${activeSuccHtml}</div>
+                                <div class="flex flex-col gap-2">
+                                    <select id="new-succ-select" class="w-full text-xs p-2 border border-slate-200 rounded-lg bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500/20">
+                                        <option value="">Añadir siguiente...</option>
+                                        ${succOptionsHtml}
+                                    </select>
+                                    <button onclick="addSuccessor('${node.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors w-full border border-blue-100">Vincular</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-5 mt-5">
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i class="ph ph-text-align-left"></i> Notas</label>
                         <textarea oninput="updateNodeProp('description', this.value)" rows="3" class="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" placeholder="Detalles...">${node.description || ''}</textarea>
                     </div>
@@ -807,399 +708,136 @@
                     <button onclick="deleteSelectedNode(); closePropertiesModal();" class="w-full py-2.5 text-sm text-red-600 font-bold hover:bg-red-50 rounded-lg transition-colors border border-red-200 shadow-sm">Eliminar Actividad</button>
                 </div>
             `;
-            
-            overlay.classList.add('active');
+            document.getElementById('properties-modal-overlay').classList.add('active');
         }
 
-        function closePropertiesModal() {
-            const overlay = document.getElementById('properties-modal-overlay');
-            overlay.classList.remove('active');
-        }
-
-        // --- PANEL COLAPSABLE ---
-        function togglePanel() {
-            state.isPanelCollapsed = !state.isPanelCollapsed;
-            localStorage.setItem('chronomap_panel_collapsed_vanilla', state.isPanelCollapsed.toString());
-            renderAll();
-        }
-
-        // --- ZOOM CON SCROLL ---
-        function handleZoomScroll(e) {
-            if (!e.ctrlKey) return;
-            
-            e.preventDefault();
-            
-            const delta = -Math.sign(e.deltaY) * 0.2;
-            let newZoom = state.zoom + delta;
-            
-            if (newZoom < 0.5) newZoom = 0.5;
-            if (newZoom > 10) newZoom = 10;
-            
-            state.zoom = newZoom;
-            renderAll();
-        }
-
-        // --- LIMPIAR LIENZO ---
-        function clearCanvas() {
-            if (state.nodes.length === 0) {
-                showToast('📦 El lienzo ya está vacío');
-                return;
-            }
-            
-            showConfirmationModal(
-                '¿Limpiar lienzo?',
-                'Se eliminarán todas las actividades. Esta acción no se puede deshacer.',
-                () => {
-                    state.nodes = [];
-                    state.selectedNodeId = null;
-                    renderAll();
-                    showToast('✅ Lienzo limpiado');
-                }
-            );
-        }
-
-        // --- MODAL DE CONFIRMACIÓN ---
+        function closePropertiesModal() { document.getElementById('properties-modal-overlay').classList.remove('active'); }
+        function togglePanel() { state.isPanelCollapsed = !state.isPanelCollapsed; localStorage.setItem('chronomap_panel_collapsed_vanilla', state.isPanelCollapsed.toString()); renderAll(); }
+        function handleZoomScroll(e) { if (!e.ctrlKey) return; e.preventDefault(); state.zoom = Math.max(0.5, Math.min(10, state.zoom + (-Math.sign(e.deltaY) * 0.2))); renderAll(); }
+        function clearCanvas() { if (state.nodes.length === 0) return showToast('📦 El lienzo ya está vacío'); showConfirmationModal('¿Limpiar lienzo?', 'Se eliminarán todas las actividades.', () => { state.nodes = []; state.selectedNodeId = null; renderAll(); showToast('✅ Lienzo limpiado'); }); }
+        
         function showConfirmationModal(title, message, onConfirm) {
             document.getElementById('confirmation-title').innerText = title;
             document.getElementById('confirmation-message').innerText = message;
-            
-            const confirmBtn = document.getElementById('confirmation-confirm-btn');
-            confirmBtn.onclick = () => {
-                onConfirm();
-                closeConfirmationModal();
-            };
-            
+            document.getElementById('confirmation-confirm-btn').onclick = () => { onConfirm(); closeConfirmationModal(); };
             document.getElementById('confirmation-modal-overlay').classList.add('active');
         }
+        function closeConfirmationModal() { document.getElementById('confirmation-modal-overlay').classList.remove('active'); }
 
-        function closeConfirmationModal() {
-            document.getElementById('confirmation-modal-overlay').classList.remove('active');
-        }
-
-        // --- UNDO/REDO (BASE) ---
-        function saveStateSnapshot() {
-            const snapshot = {
-                areas: JSON.parse(JSON.stringify(state.areas)),
-                nodes: JSON.parse(JSON.stringify(state.nodes)),
-                zoom: state.zoom
-            };
-            
-            state.history.past.push(snapshot);
-            
-            if (state.history.past.length > state.history.maxSize) {
-                state.history.past.shift();
-            }
-            
-            state.history.future = [];
-        }
-
-        function undo() {
-            if (state.history.past.length === 0) return;
-            
-            const currentState = {
-                areas: JSON.parse(JSON.stringify(state.areas)),
-                nodes: JSON.parse(JSON.stringify(state.nodes)),
-                zoom: state.zoom
-            };
-            
-            state.history.future.push(currentState);
-            
-            const previousState = state.history.past.pop();
-            state.areas = previousState.areas;
-            state.nodes = previousState.nodes;
-            state.zoom = previousState.zoom;
-            
-            renderAll();
-        }
-
-        function redo() {
-            if (state.history.future.length === 0) return;
-            
-            const currentState = {
-                areas: JSON.parse(JSON.stringify(state.areas)),
-                nodes: JSON.parse(JSON.stringify(state.nodes)),
-                zoom: state.zoom
-            };
-            
-            state.history.past.push(currentState);
-            
-            const nextState = state.history.future.pop();
-            state.areas = nextState.areas;
-            state.nodes = nextState.nodes;
-            state.zoom = nextState.zoom;
-            
-            renderAll();
-        }
-
-        // Sistema de detección de doble click
-        let lastClickTime = 0;
-        let lastClickNodeId = null;
-        let dragOccurred = false;
-
+        let lastClickTime = 0; let lastClickNodeId = null; let dragOccurred = false;
         function handleNodeClick(e, nodeId) {
-            // Si hubo drag, no procesar como click
-            if (dragOccurred) {
-                dragOccurred = false;
-                return;
-            }
-            
+            if (dragOccurred) { dragOccurred = false; return; }
             const now = Date.now();
-            const timeDiff = now - lastClickTime;
-            
-            // Si es doble click (menos de 400ms entre clicks en el mismo nodo)
-            if (timeDiff < 400 && lastClickNodeId === nodeId) {
-                // Cancelar drag
-                interaction = null;
-                // Abrir modal
-                openPropertiesModal(nodeId);
-                // Reset
-                lastClickTime = 0;
-                lastClickNodeId = null;
-            } else {
-                // Primer click
-                lastClickTime = now;
-                lastClickNodeId = nodeId;
-            }
+            if (now - lastClickTime < 400 && lastClickNodeId === nodeId) {
+                interaction = null; openPropertiesModal(nodeId); lastClickTime = 0; lastClickNodeId = null;
+            } else { lastClickTime = now; lastClickNodeId = nodeId; }
         }
 
         function startInteraction(e, nodeId, mode) {
             e.stopPropagation();
             const node = state.nodes.find(n => n.id === nodeId);
             if (!node) return;
-            
             selectNode(nodeId);
-            
-            interaction = {
-                id: nodeId,
-                mode: mode,
-                startX: e.clientX,
-                startY: e.clientY,
-                initialStart: node.startTime,
-                initialEnd: node.endTime
-            };
-            
+            interaction = { id: nodeId, mode: mode, startX: e.clientX, startY: e.clientY, initialStart: node.startTime, initialEnd: node.endTime };
             renderTimeline();
         }
 
         function handleMouseMove(e) {
             if (!interaction) return;
-
             const deltaX = e.clientX - interaction.startX;
             const deltaY = e.clientY - interaction.startY;
-            
-            // Requerir movimiento mínimo de 5px para iniciar drag (evita clicks accidentales)
-            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            if (distance < 5) return;
-            
-            // Marcar que hubo drag
+            if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < 5) return;
             dragOccurred = true;
             
-            const deltaMinutes = deltaX / state.zoom;
-            const nodeIndex = state.nodes.findIndex(n => n.id === interaction.id);
-            if (nodeIndex === -1) return;
+            const n = state.nodes.find(n => n.id === interaction.id);
+            if (!n) return;
             
-            const n = state.nodes[nodeIndex];
-            let newStart = n.startTime;
-            let newEnd = n.endTime;
             const minDur = 15;
+            const deltaMinutes = deltaX / state.zoom;
+            let newStart = n.startTime, newEnd = n.endTime;
 
             if (interaction.mode === 'move') {
-                newStart = interaction.initialStart + deltaMinutes;
-                newStart = Math.round(newStart / SNAP_MINUTES) * SNAP_MINUTES;
+                newStart = Math.round((interaction.initialStart + deltaMinutes) / SNAP_MINUTES) * SNAP_MINUTES;
                 const dur = interaction.initialEnd - interaction.initialStart;
-                
                 if (newStart < 0) newStart = 0;
                 if (newStart + dur > TOTAL_MINUTES) newStart = TOTAL_MINUTES - dur;
                 newEnd = newStart + dur;
 
-                const container = document.getElementById('scroll-container');
-                const rect = container.getBoundingClientRect();
+                const rect = document.getElementById('scroll-container').getBoundingClientRect();
                 if (e.clientY > rect.top + 40 && e.clientY < rect.bottom) {
-                    const scrollY = container.scrollTop;
-                    const relativeY = e.clientY - rect.top + scrollY - 40;
-                    
-                    // Calcular área y subcarril
-                    let accumulatedHeight = 0;
-                    let targetAreaId = n.areaId;
-                    let targetSublane = n.sublane || 0;
-                    
-                    for (let i = 0; i < state.areas.length; i++) {
-                        const area = state.areas[i];
-                        const sublaneCount = getAreaSublaneCount(area.id);
-                        const sublaneHeight = 60;
-                        const areaHeight = Math.max(sublaneCount * sublaneHeight + 16, 76);
-                        
-                        if (relativeY >= accumulatedHeight && relativeY < accumulatedHeight + areaHeight) {
-                            targetAreaId = area.id;
-                            // Calcular subcarril dentro del área
-                            const yInArea = relativeY - accumulatedHeight;
-                            targetSublane = Math.floor(yInArea / sublaneHeight);
-                            if (targetSublane >= sublaneCount) targetSublane = sublaneCount - 1;
-                            if (targetSublane < 0) targetSublane = 0;
+                    const relativeY = e.clientY - rect.top + document.getElementById('scroll-container').scrollTop - 40;
+                    let accumulated = 0, targetArea = n.areaId, targetSublane = n.sublane || 0;
+                    for (const area of state.areas) {
+                        const sCount = getAreaSublaneCount(area.id);
+                        const aHeight = Math.max(sCount * 60 + 16, 76);
+                        if (relativeY >= accumulated && relativeY < accumulated + aHeight) {
+                            targetArea = area.id;
+                            targetSublane = Math.max(0, Math.min(sCount - 1, Math.floor((relativeY - accumulated) / 60)));
                             break;
                         }
-                        accumulatedHeight += areaHeight + 4; // +4 para el espacio entre áreas
+                        accumulated += aHeight + 4;
                     }
-                    
-                    // Marcar como posición manual si cambió de subcarril
-                    if (n.areaId !== targetAreaId || n.sublane !== targetSublane) {
-                        n.manualSublane = true;
-                    }
-                    n.areaId = targetAreaId;
-                    n.sublane = targetSublane;
+                    if (n.areaId !== targetArea || n.sublane !== targetSublane) n.manualSublane = true;
+                    n.areaId = targetArea; n.sublane = targetSublane;
                 }
             } else if (interaction.mode === 'resize-left') {
-                newStart = interaction.initialStart + deltaMinutes;
-                newStart = Math.round(newStart / SNAP_MINUTES) * SNAP_MINUTES;
+                newStart = Math.round((interaction.initialStart + deltaMinutes) / SNAP_MINUTES) * SNAP_MINUTES;
                 if (newStart < 0) newStart = 0;
                 if (newStart > n.endTime - minDur) newStart = n.endTime - minDur;
             } else if (interaction.mode === 'resize-right') {
-                newEnd = interaction.initialEnd + deltaMinutes;
-                newEnd = Math.round(newEnd / SNAP_MINUTES) * SNAP_MINUTES;
+                newEnd = Math.round((interaction.initialEnd + deltaMinutes) / SNAP_MINUTES) * SNAP_MINUTES;
                 if (newEnd > TOTAL_MINUTES) newEnd = TOTAL_MINUTES;
                 if (newEnd < n.startTime + minDur) newEnd = n.startTime + minDur;
             }
 
-            n.startTime = newStart;
-            n.endTime = newEnd;
-            
+            n.startTime = newStart; n.endTime = newEnd;
             renderTimeline();
-            // Actualizar modal si está abierto
-            if(interaction.mode === 'resize-left' || interaction.mode === 'resize-right' || interaction.mode === 'move'){
-                const modalOverlay = document.getElementById('properties-modal-overlay');
-                if (modalOverlay.classList.contains('active')) {
-                    openPropertiesModal(state.selectedNodeId);
-                }
+            
+            // Actualizar modal si está visible para ver el conflicto en vivo
+            if (document.getElementById('properties-modal-overlay').classList.contains('active')) {
+                openPropertiesModal(n.id);
             }
         }
 
-        function handleMouseUp() {
-            if (interaction) {
-                interaction = null;
-                renderAll(); 
-            }
-        }
-
-        function selectNode(id) {
-            state.selectedNodeId = id;
-            renderAll();
-        }
-
-        function changeZoom(delta) {
-            let newZoom = state.zoom + delta;
-            if (newZoom < 0.5) newZoom = 0.5;
-            if (newZoom > 10) newZoom = 10;
-            state.zoom = newZoom;
-            renderAll();
-        }
-
-        function addArea() {
-            state.areas.push({
-                id: 'a' + Date.now(),
-                name: 'Nueva Área',
-                color: '#94a3b8',
-                order: state.areas.length + 1
-            });
-            renderAll();
-            showToast("Área añadida");
-        }
-
-        function updateArea(id, name) {
-            const area = state.areas.find(a => a.id === id);
-            if (area) area.name = name;
-            renderAll();
-        }
-
-        function updateAreaColor(id, color) {
-            const area = state.areas.find(a => a.id === id);
-            if (area) area.color = color;
-            renderAll();
-        }
-
+        function handleMouseUp() { if (interaction) { interaction = null; renderAll(); } }
+        function selectNode(id) { state.selectedNodeId = id; renderAll(); }
+        function addArea() { state.areas.push({ id: 'a' + Date.now(), name: 'Nueva Área', color: '#94a3b8', order: state.areas.length + 1 }); renderAll(); }
+        function updateArea(id, name) { const a = state.areas.find(a => a.id === id); if (a) { a.name = name; renderAll(); } }
+        function updateAreaColor(id, color) { const a = state.areas.find(a => a.id === id); if (a) { a.color = color; renderAll(); } }
+        
         function removeArea(id) {
             state.areas = state.areas.filter(a => a.id !== id);
+            const nodesToRemove = state.nodes.filter(n => n.areaId === id).map(n => n.id);
             state.nodes = state.nodes.filter(n => n.areaId !== id);
-            if (state.selectedNodeId && !state.nodes.find(n => n.id === state.selectedNodeId)) {
-                state.selectedNodeId = null;
-            }
-            renderAll();
-            showToast("Área eliminada");
+            // Limpiar dependencias huerfanas
+            state.nodes.forEach(n => {
+                if(n.dependencies) n.dependencies = n.dependencies.filter(dep => !nodesToRemove.includes(dep));
+            });
+            if (nodesToRemove.includes(state.selectedNodeId)) state.selectedNodeId = null;
+            renderAll(); showToast("Área eliminada");
         }
 
-        // --- MENÚ CONTEXTUAL ---
         function showContextMenu(e, nodeId) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const menu = document.getElementById('context-menu');
-            const node = state.nodes.find(n => n.id === nodeId);
-            if (!node) return;
-            
+            e.preventDefault(); e.stopPropagation();
             selectNode(nodeId);
-            
-            const canPaste = state.copiedNode !== null;
-            
-            menu.innerHTML = `
-                <div class="context-menu-item" onclick="openPropertiesModal('${nodeId}'); hideContextMenu();">
-                    <i class="ph ph-note-pencil"></i>
-                    <span>Editar</span>
-                    <span class="ml-auto text-xs text-slate-400">Doble click</span>
-                </div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item" onclick="copyNode(); hideContextMenu();">
-                    <i class="ph ph-copy"></i>
-                    <span>Copiar</span>
-                    <span class="ml-auto text-xs text-slate-400">Ctrl+C</span>
-                </div>
-                ${canPaste ? `
-                <div class="context-menu-item" onclick="pasteNode(); hideContextMenu();">
-                    <i class="ph ph-clipboard"></i>
-                    <span>Pegar</span>
-                    <span class="ml-auto text-xs text-slate-400">Ctrl+V</span>
-                </div>` : ''}
-                <div class="context-menu-item" onclick="duplicateNode('${nodeId}'); hideContextMenu();">
-                    <i class="ph ph-copy-simple"></i>
-                    <span>Duplicar</span>
-                </div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item danger" onclick="deleteSelectedNode(); hideContextMenu();">
-                    <i class="ph ph-trash"></i>
-                    <span>Eliminar</span>
-                    <span class="ml-auto text-xs text-slate-400">Del</span>
-                </div>
-            `;
-            
-            menu.style.left = `${e.clientX}px`;
-            menu.style.top = `${e.clientY}px`;
-            menu.classList.remove('hidden');
-        }
-
-        function hideContextMenu() {
             const menu = document.getElementById('context-menu');
-            menu.classList.add('hidden');
+            const canPaste = state.copiedNode !== null;
+            menu.innerHTML = `
+                <div class="context-menu-item" onclick="openPropertiesModal('${nodeId}'); hideContextMenu();"><i class="ph ph-note-pencil"></i><span>Editar</span><span class="ml-auto text-xs text-slate-400">Doble clic</span></div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item" onclick="copyNode(); hideContextMenu();"><i class="ph ph-copy"></i><span>Copiar</span><span class="ml-auto text-xs text-slate-400">Ctrl+C</span></div>
+                ${canPaste ? `<div class="context-menu-item" onclick="pasteNode(); hideContextMenu();"><i class="ph ph-clipboard"></i><span>Pegar</span><span class="ml-auto text-xs text-slate-400">Ctrl+V</span></div>` : ''}
+                <div class="context-menu-item" onclick="duplicateNode('${nodeId}'); hideContextMenu();"><i class="ph ph-copy-simple"></i><span>Duplicar</span></div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item danger" onclick="deleteSelectedNode(); hideContextMenu();"><i class="ph ph-trash"></i><span>Eliminar</span><span class="ml-auto text-xs text-slate-400">Del</span></div>`;
+            menu.style.left = `${e.clientX}px`; menu.style.top = `${e.clientY}px`; menu.classList.remove('hidden');
         }
+        function hideContextMenu() { document.getElementById('context-menu').classList.add('hidden'); }
 
         function addNode() {
-            if (state.areas.length === 0) {
-                showToast("Por favor, crea un Área primero.");
-                return;
-            }
-            const newNode = {
-                id: 'n' + Date.now(),
-                name: 'Nueva Actividad',
-                startTime: 480,
-                endTime: 540,
-                areaId: state.areas[0].id,
-                color: '#ffffff',
-                description: '',
-                customFields: [],
-                sublane: 0
-            };
-            state.nodes.push(newNode);
-            state.selectedNodeId = newNode.id;
-            renderAll();
-            showToast("Actividad creada");
-            // Abrir modal automáticamente
+            if (!state.areas.length) return showToast("Por favor, crea un Área primero.");
+            const newNode = { id: 'n' + Date.now(), name: 'Nueva Actividad', startTime: 480, endTime: 540, areaId: state.areas[0].id, color: '#ffffff', description: '', customFields: [], sublane: 0, dependencies: [] };
+            state.nodes.push(newNode); state.selectedNodeId = newNode.id; renderAll(); showToast("Actividad creada");
             setTimeout(() => openPropertiesModal(newNode.id), 100);
         }
 
@@ -1207,109 +845,63 @@
             const node = state.nodes.find(n => n.id === state.selectedNodeId);
             if (!node) return;
             node[prop] = isTime ? parseTime(value) : value;
-            
-            // Solo actualizar timeline y guardar, NO renderAll para mantener focus
-            renderTimeline();
-            saveData();
-            
-            // Si se cambió el color, actualizar el modal para reflejar selección visual
-            if (prop === 'color') {
-                const modalOverlay = document.getElementById('properties-modal-overlay');
-                if (modalOverlay.classList.contains('active')) {
-                    openPropertiesModal(state.selectedNodeId);
-                }
-            }
+            renderTimeline(); saveData();
+            if (prop === 'color' && document.getElementById('properties-modal-overlay').classList.contains('active')) openPropertiesModal(state.selectedNodeId);
         }
 
         function deleteSelectedNode() {
-            state.nodes = state.nodes.filter(n => n.id !== state.selectedNodeId);
-            state.selectedNodeId = null;
-            renderAll();
-            showToast("Actividad eliminada");
+            const delId = state.selectedNodeId;
+            state.nodes = state.nodes.filter(n => n.id !== delId);
+            // Remover dependencias de otras tareas
+            state.nodes.forEach(n => {
+                if (n.dependencies) n.dependencies = n.dependencies.filter(id => id !== delId);
+            });
+            state.selectedNodeId = null; renderAll(); showToast("Actividad eliminada");
         }
 
         function addCustomField() {
             const node = state.nodes.find(n => n.id === state.selectedNodeId);
             if (!node) return;
-            if(!node.customFields) node.customFields = [];
             node.customFields.push({ id: 'cf' + Date.now(), key: 'Nueva Propiedad', value: '' });
-            
-            // Actualizar modal sin perder focus
-            openPropertiesModal(state.selectedNodeId);
-            saveData();
+            openPropertiesModal(state.selectedNodeId); saveData();
         }
-
         function updateCustomField(fieldId, prop, value) {
-            const node = state.nodes.find(n => n.id === state.selectedNodeId);
-            if (!node) return;
-            const field = node.customFields.find(cf => cf.id === fieldId);
-            if(field) field[prop] = value;
-            saveData(); 
+            const field = state.nodes.find(n => n.id === state.selectedNodeId)?.customFields.find(cf => cf.id === fieldId);
+            if(field) { field[prop] = value; saveData(); }
         }
-
         function removeCustomField(fieldId) {
             const node = state.nodes.find(n => n.id === state.selectedNodeId);
             if (!node) return;
             node.customFields = node.customFields.filter(cf => cf.id !== fieldId);
-            
-            // Actualizar modal sin perder focus
-            openPropertiesModal(state.selectedNodeId);
-            saveData();
+            openPropertiesModal(state.selectedNodeId); saveData();
         }
 
         function exportToJson() {
-            showLoading("Compilando datos del proyecto...");
-            
+            showLoading("Compilando datos...");
             setTimeout(() => {
-                const dataToExport = {
-                    version: '1.0',
-                    timestamp: new Date().toISOString(),
-                    areas: state.areas,
-                    nodes: state.nodes,
-                    settings: { zoom: state.zoom }
-                };
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", `chronomap-${new Date().getTime()}.json`);
-                document.body.appendChild(downloadAnchorNode); 
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-                
-                hideLoading();
-                showToast("Proyecto exportado exitosamente");
+                const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ version: '1.0', timestamp: new Date().toISOString(), areas: state.areas, nodes: state.nodes, settings: { zoom: state.zoom } }, null, 2));
+                const a = document.createElement('a'); a.href = data; a.download = `chronomap-${Date.now()}.json`; document.body.appendChild(a); a.click(); a.remove();
+                hideLoading(); showToast("Exportado exitosamente");
             }, 600);
         }
 
         function importFromJson(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            showLoading("Analizando e importando archivo...");
-
+            const file = e.target.files[0]; if (!file) return;
+            showLoading("Importando...");
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = (ev) => {
                 setTimeout(() => {
                     try {
-                        const importedData = JSON.parse(event.target.result);
-                        if (importedData.areas && importedData.nodes) {
-                            state.areas = importedData.areas;
-                            state.nodes = importedData.nodes;
-                            if (importedData.settings && importedData.settings.zoom) {
-                                state.zoom = importedData.settings.zoom;
-                            }
-                            state.selectedNodeId = null;
-                            renderAll();
-                            hideLoading();
-                            showToast("Proyecto importado exitosamente");
-                        } else {
-                            hideLoading();
-                            showToast("El archivo no tiene el formato de ChronoMap.");
-                        }
-                    } catch (error) {
-                        hideLoading();
-                        showToast("Error: JSON inválido o corrupto.");
-                    }
+                        const data = JSON.parse(ev.target.result);
+                        if (data.areas && data.nodes) {
+                            state.areas = data.areas; state.nodes = data.nodes;
+                            // Asegurar arrays de dependencias viejos
+                            state.nodes.forEach(n => { if(!n.dependencies) n.dependencies = []; });
+                            if (data.settings?.zoom) state.zoom = data.settings.zoom;
+                            state.selectedNodeId = null; renderAll(); showToast("Importado exitosamente");
+                        } else throw new Error();
+                    } catch (err) { showToast("Error: Archivo inválido."); }
+                    hideLoading();
                 }, 600);
                 e.target.value = null;
             };
@@ -1317,46 +909,44 @@
         }
 
         function exportToImage() {
-            showLoading("Renderizando imagen de alta calidad... Esto puede tardar unos segundos.");
-            
+            showLoading("Renderizando imagen...");
             setTimeout(() => {
-                const prevSelected = state.selectedNodeId;
-                selectNode(null);
-
-                const elementToCapture = document.getElementById('timeline-wrapper');
+                const prev = state.selectedNodeId; selectNode(null);
+                const el = document.getElementById('timeline-wrapper');
+                const origBg = el.style.backgroundColor; 
+                const origPadding = el.style.padding;
+                el.style.backgroundColor = '#f8fafc';
+                el.style.padding = '20px'; // Añadir padding para evitar cortes
                 
-                const originalBackground = elementToCapture.style.backgroundColor;
-                elementToCapture.style.backgroundColor = '#f8fafc';
-
-                html2canvas(elementToCapture, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#f8fafc'
+                html2canvas(el, { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false, 
+                    backgroundColor: '#f8fafc',
+                    windowWidth: el.scrollWidth + 40,
+                    windowHeight: el.scrollHeight + 40
                 }).then(canvas => {
-                    elementToCapture.style.backgroundColor = originalBackground;
-                    if(prevSelected) selectNode(prevSelected);
-
-                    const imgData = canvas.toDataURL('image/png');
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = imgData;
-                    downloadLink.download = `chronomap-timeline-${new Date().getTime()}.png`;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                    
-                    hideLoading();
-                    showToast("Línea de tiempo guardada como imagen.");
-                }).catch(err => {
-                    console.error("Error capturando imagen:", err);
-                    if(prevSelected) selectNode(prevSelected);
-                    hideLoading();
-                    showToast("Hubo un problema al generar la imagen.");
+                    el.style.backgroundColor = origBg; 
+                    el.style.padding = origPadding;
+                    if(prev) selectNode(prev);
+                    const a = document.createElement('a'); 
+                    a.href = canvas.toDataURL('image/png'); 
+                    a.download = `chronomap-${Date.now()}.png`; 
+                    document.body.appendChild(a); 
+                    a.click(); 
+                    a.remove();
+                    hideLoading(); 
+                    showToast("✅ Guardado como imagen.");
+                }).catch(() => { 
+                    if(prev) selectNode(prev); 
+                    el.style.backgroundColor = origBg;
+                    el.style.padding = origPadding;
+                    hideLoading(); 
+                    showToast("❌ Error al generar imagen."); 
                 });
             }, 800);
         }
 
-        // Arrancar aplicación
         init();
     </script>
 </body>
