@@ -104,14 +104,18 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 
 ## 🚀 Instalación y Uso
 
+### 🌐 Demo en Vivo
+Prueba ChronoMap directamente en tu navegador:
+👉 **[https://rubaanxd.github.io/Timelines/](https://rubaanxd.github.io/Timelines/)**
+
 ### Requisitos
 - Navegador web moderno (Chrome, Firefox, Safari, Edge)
 - Conexión a internet (para cargar CDNs)
 
-### Instalación
+### Instalación Local
 1. Clona el repositorio:
 ```bash
-git clone <repository-url>
+git clone https://github.com/rubaanxd/Timelines.git
 cd Timelines
 ```
 
@@ -119,6 +123,25 @@ cd Timelines
 - Doble clic en el archivo, o
 - Arrastra el archivo a tu navegador, o
 - Usa un servidor local (opcional)
+
+### 🚀 Despliegue en GitHub Pages
+
+Este proyecto está configurado para desplegarse automáticamente en GitHub Pages:
+
+1. **Fork o clona el repositorio**
+2. **Habilita GitHub Pages**:
+   - Ve a Settings → Pages
+   - Source: GitHub Actions
+   - El workflow `.github/workflows/deploy.yml` se ejecutará automáticamente
+3. **Accede a tu sitio**:
+   - URL: `https://tu-usuario.github.io/Timelines/`
+   - El despliegue toma ~2 minutos
+
+**Archivos importantes para GitHub Pages:**
+- `index.html` - Página de bienvenida
+- `.nojekyll` - Evita procesamiento Jekyll
+- `CNAME` - Para dominio personalizado (opcional)
+- `.github/workflows/deploy.yml` - Automatización del despliegue
 
 ### Uso
 1. **Agregar Actividad**: Click en "Nueva Actividad"
@@ -144,9 +167,21 @@ cd Timelines
 
 ```
 Timelines/
-├── ChronoMap.html    # Aplicación principal (todo en un archivo)
-├── README.md         # Documentación
-└── .gitignore        # Archivos ignorados por Git
+├── ChronoMap.html              # Aplicación principal (todo en un archivo)
+├── index.html                  # Página de bienvenida para GitHub Pages
+├── README.md                   # Documentación del proyecto
+├── .gitignore                  # Archivos ignorados por Git
+├── .nojekyll                   # Configuración para GitHub Pages
+├── CNAME                       # Dominio personalizado (opcional)
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # GitHub Actions para despliegue automático
+└── .context/                   # Documentación técnica (excluida de Git)
+    ├── TECHNICAL.md
+    ├── ARCHITECTURE.md
+    ├── DEVELOPMENT_GUIDE.md
+    ├── PROJECT_STATUS.md
+    └── AI_CONTEXT.md
 ```
 
 ## 🤝 Contribución
