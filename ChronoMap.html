@@ -345,12 +345,36 @@
             <span>Limpiar</span>
         </button>
         <div class="w-px h-4 bg-slate-300"></div>
+        
+        <!-- Barra de búsqueda -->
+        <div class="flex items-center bg-white border border-slate-200 rounded-lg shadow-sm px-3 py-1.5 min-w-[200px] max-w-[300px]">
+            <i class="ph ph-magnifying-glass text-slate-400 text-sm"></i>
+            <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Buscar actividades..." 
+                oninput="handleSearch(this.value)"
+                class="ml-2 flex-1 text-sm outline-none bg-transparent text-slate-700 placeholder-slate-400"
+            />
+            <button onclick="clearSearch()" id="clear-search-btn" class="ml-1 p-1 text-slate-400 hover:text-slate-600 rounded transition-colors hidden">
+                <i class="ph ph-x text-xs"></i>
+            </button>
+        </div>
+        
+        <!-- Botón de filtros -->
+        <button onclick="toggleFiltersPanel()" id="filters-toggle" class="flex items-center space-x-2 px-4 py-1.5 bg-white border border-slate-200 shadow-sm hover:border-blue-400 hover:text-blue-600 text-slate-700 text-sm font-medium rounded-lg transition-all">
+            <i class="ph ph-funnel text-lg"></i>
+            <span class="hidden sm:inline">Filtros</span>
+            <span id="active-filters-badge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">0</span>
+        </button>
+        
+        <div class="w-px h-4 bg-slate-300"></div>
         <button onclick="toggleViewMode()" id="view-mode-toggle" class="flex items-center space-x-2 px-4 py-1.5 bg-white border border-slate-200 shadow-sm hover:border-purple-400 hover:text-purple-600 text-slate-700 text-sm font-medium rounded-lg transition-all">
             <i id="view-mode-icon" class="ph ph-eye text-lg"></i>
             <span id="view-mode-text">Presentación</span>
         </button>
         <div class="w-px h-4 bg-slate-300"></div>
-        <span class="text-xs text-slate-500 hidden sm:flex items-center">
+        <span class="text-xs text-slate-500 hidden lg:flex items-center">
             <i class="ph ph-hand mr-1 opacity-50"></i> Arrastra espacio vacío para desplazar • Arrastra nodos para mover • Doble clic para editar
         </span>
         <div class="flex-1"></div>
@@ -363,6 +387,64 @@
             <button onclick="changeZoom(0.5)" class="p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-md transition-colors" title="Acercar">
                 <i class="ph ph-magnifying-glass-plus text-lg"></i>
             </button>
+        </div>
+    </div>
+
+    <!-- Panel de Filtros -->
+    <div id="filters-panel" class="hidden bg-white border-b border-slate-200 shadow-sm z-30">
+        <div class="px-6 py-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Filtro por Áreas -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Áreas</label>
+                    <div id="area-filters" class="space-y-1 max-h-32 overflow-y-auto custom-scrollbar"></div>
+                </div>
+                
+                <!-- Filtro por Estado -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Estado</label>
+                    <div class="space-y-1">
+                        <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                            <input type="checkbox" value="pending" onchange="toggleStatusFilter(this.value, this.checked)" class="mr-2 rounded border-slate-300">
+                            <i class="ph ph-circle text-slate-400 mr-1"></i> Pendiente
+                        </label>
+                        <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                            <input type="checkbox" value="in-progress" onchange="toggleStatusFilter(this.value, this.checked)" class="mr-2 rounded border-slate-300">
+                            <i class="ph ph-circle-half text-blue-500 mr-1"></i> En Progreso
+                        </label>
+                        <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                            <input type="checkbox" value="completed" onchange="toggleStatusFilter(this.value, this.checked)" class="mr-2 rounded border-slate-300">
+                            <i class="ph-fill ph-check-circle text-green-500 mr-1"></i> Completado
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Filtro por Prioridad -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Prioridad</label>
+                    <div class="space-y-1">
+                        <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                            <input type="checkbox" value="low" onchange="togglePriorityFilter(this.value, this.checked)" class="mr-2 rounded border-slate-300">
+                            <i class="ph ph-arrow-down text-slate-400 mr-1"></i> Baja
+                        </label>
+                        <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                            <input type="checkbox" value="medium" onchange="togglePriorityFilter(this.value, this.checked)" class="mr-2 rounded border-slate-300">
+                            <i class="ph ph-equals text-yellow-500 mr-1"></i> Media
+                        </label>
+                        <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                            <input type="checkbox" value="high" onchange="togglePriorityFilter(this.value, this.checked)" class="mr-2 rounded border-slate-300">
+                            <i class="ph ph-arrow-up text-red-500 mr-1"></i> Alta
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Acciones -->
+                <div class="flex flex-col justify-end">
+                    <button onclick="clearAllFilters()" class="w-full px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200">
+                        <i class="ph ph-x mr-1"></i> Limpiar Filtros
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -440,7 +522,14 @@
             copiedNode: null,
             isPanelCollapsed: false,
             theme: 'light',
-            viewMode: 'edit' // 'edit' | 'readonly' | 'presentation'
+            viewMode: 'edit', // 'edit' | 'readonly' | 'presentation'
+            searchQuery: '',
+            filters: {
+                areas: [], // IDs de áreas seleccionadas
+                statuses: [], // 'pending', 'in-progress', 'completed'
+                priorities: [], // 'low', 'medium', 'high'
+                tags: [] // Tags seleccionados
+            }
         };
 
         let interaction = null;
@@ -815,6 +904,9 @@
             const container = document.getElementById('lanes-container');
             let html = '';
             
+            // Aplicar filtros y búsqueda
+            const filteredNodes = filterNodes(state.nodes);
+            
             // 1. Preparar posiciones absolutas para las dependencias
             const nodePositions = {};
             let accumulatedHeight = 0;
@@ -825,7 +917,7 @@
                 const sublaneHeight = 60; 
                 const areaHeight = Math.max(sublaneCount * sublaneHeight + 16, 76);
                 
-                const nodesInArea = state.nodes.filter(n => n.areaId === area.id);
+                const nodesInArea = filteredNodes.filter(n => n.areaId === area.id);
                 
                 // Guardar posiciones para dibujar las líneas
                 nodesInArea.forEach(node => {
@@ -1176,6 +1268,26 @@
                         </div>
                     </div>
                     
+                    <!-- Estado y Prioridad -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Estado</label>
+                            <select onchange="updateNodeProp('status', this.value)" class="w-full text-sm p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer">
+                                <option value="pending" ${(node.status || 'pending') === 'pending' ? 'selected' : ''}>⚪ Pendiente</option>
+                                <option value="in-progress" ${(node.status || 'pending') === 'in-progress' ? 'selected' : ''}>🔵 En Progreso</option>
+                                <option value="completed" ${(node.status || 'pending') === 'completed' ? 'selected' : ''}>✅ Completado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Prioridad</label>
+                            <select onchange="updateNodeProp('priority', this.value)" class="w-full text-sm p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer">
+                                <option value="low" ${(node.priority || 'medium') === 'low' ? 'selected' : ''}>⬇️ Baja</option>
+                                <option value="medium" ${(node.priority || 'medium') === 'medium' ? 'selected' : ''}>➡️ Media</option>
+                                <option value="high" ${(node.priority || 'medium') === 'high' ? 'selected' : ''}>⬆️ Alta</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div class="border-t border-slate-100 pt-5">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -1227,6 +1339,143 @@
 
         function closePropertiesModal() { document.getElementById('properties-modal-overlay').classList.remove('active'); }
         function togglePanel() { state.isPanelCollapsed = !state.isPanelCollapsed; localStorage.setItem('chronomap_panel_collapsed_vanilla', state.isPanelCollapsed.toString()); renderAll(); }
+        
+        // Funciones de búsqueda y filtros
+        function handleSearch(query) {
+            state.searchQuery = query.toLowerCase().trim();
+            const clearBtn = document.getElementById('clear-search-btn');
+            if (state.searchQuery) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderTimeline();
+        }
+        
+        function clearSearch() {
+            state.searchQuery = '';
+            document.getElementById('search-input').value = '';
+            document.getElementById('clear-search-btn').classList.add('hidden');
+            renderTimeline();
+        }
+        
+        function toggleFiltersPanel() {
+            const panel = document.getElementById('filters-panel');
+            const btn = document.getElementById('filters-toggle');
+            
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                btn.classList.add('bg-blue-50', 'border-blue-300', 'text-blue-700');
+                renderAreaFilters();
+            } else {
+                panel.classList.add('hidden');
+                btn.classList.remove('bg-blue-50', 'border-blue-300', 'text-blue-700');
+            }
+        }
+        
+        function renderAreaFilters() {
+            const container = document.getElementById('area-filters');
+            let html = state.areas.map(area => `
+                <label class="flex items-center text-sm text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+                    <input type="checkbox" value="${area.id}" onchange="toggleAreaFilter('${area.id}', this.checked)" class="mr-2 rounded border-slate-300" ${state.filters.areas.includes(area.id) ? 'checked' : ''}>
+                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${area.color}"></div>
+                    ${area.name}
+                </label>
+            `).join('');
+            container.innerHTML = html || '<div class="text-xs text-slate-400 italic p-2">Sin áreas</div>';
+        }
+        
+        function toggleAreaFilter(areaId, checked) {
+            if (checked) {
+                if (!state.filters.areas.includes(areaId)) {
+                    state.filters.areas.push(areaId);
+                }
+            } else {
+                state.filters.areas = state.filters.areas.filter(id => id !== areaId);
+            }
+            updateActiveFiltersCount();
+            renderTimeline();
+        }
+        
+        function toggleStatusFilter(status, checked) {
+            if (checked) {
+                if (!state.filters.statuses.includes(status)) {
+                    state.filters.statuses.push(status);
+                }
+            } else {
+                state.filters.statuses = state.filters.statuses.filter(s => s !== status);
+            }
+            updateActiveFiltersCount();
+            renderTimeline();
+        }
+        
+        function togglePriorityFilter(priority, checked) {
+            if (checked) {
+                if (!state.filters.priorities.includes(priority)) {
+                    state.filters.priorities.push(priority);
+                }
+            } else {
+                state.filters.priorities = state.filters.priorities.filter(p => p !== priority);
+            }
+            updateActiveFiltersCount();
+            renderTimeline();
+        }
+        
+        function clearAllFilters() {
+            state.filters = {
+                areas: [],
+                statuses: [],
+                priorities: [],
+                tags: []
+            };
+            state.searchQuery = '';
+            document.getElementById('search-input').value = '';
+            document.getElementById('clear-search-btn').classList.add('hidden');
+            
+            // Desmarcar todos los checkboxes
+            document.querySelectorAll('#filters-panel input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            updateActiveFiltersCount();
+            renderTimeline();
+        }
+        
+        function updateActiveFiltersCount() {
+            const count = state.filters.areas.length + state.filters.statuses.length + state.filters.priorities.length + state.filters.tags.length;
+            const badge = document.getElementById('active-filters-badge');
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        
+        function filterNodes(nodes) {
+            return nodes.filter(node => {
+                // Búsqueda por nombre
+                if (state.searchQuery && !node.name.toLowerCase().includes(state.searchQuery)) {
+                    return false;
+                }
+                
+                // Filtro por área
+                if (state.filters.areas.length > 0 && !state.filters.areas.includes(node.areaId)) {
+                    return false;
+                }
+                
+                // Filtro por estado
+                if (state.filters.statuses.length > 0 && !state.filters.statuses.includes(node.status || 'pending')) {
+                    return false;
+                }
+                
+                // Filtro por prioridad
+                if (state.filters.priorities.length > 0 && !state.filters.priorities.includes(node.priority || 'medium')) {
+                    return false;
+                }
+                
+                return true;
+            });
+        }
         
         function handleZoomScroll(e) { 
             if (!e.ctrlKey) return; 
@@ -1413,7 +1662,21 @@
 
         function addNode() {
             if (!state.areas.length) return showToast("Por favor, crea un Área primero.");
-            const newNode = { id: 'n' + Date.now(), name: 'Nueva Actividad', startTime: 480, endTime: 540, areaId: state.areas[0].id, color: '#ffffff', description: '', customFields: [], sublane: 0, dependencies: [] };
+            const newNode = { 
+                id: 'n' + Date.now(), 
+                name: 'Nueva Actividad', 
+                startTime: 480, 
+                endTime: 540, 
+                areaId: state.areas[0].id, 
+                color: '#ffffff', 
+                description: '', 
+                customFields: [], 
+                sublane: 0, 
+                dependencies: [],
+                status: 'pending',
+                priority: 'medium',
+                tags: []
+            };
             state.nodes.push(newNode); state.selectedNodeId = newNode.id; renderAll(); showToast("Actividad creada");
             setTimeout(() => openPropertiesModal(newNode.id), 100);
         }
