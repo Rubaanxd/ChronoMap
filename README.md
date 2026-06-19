@@ -115,7 +115,7 @@ Prueba ChronoMap directamente en tu navegador:
 ### Instalación Local
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/rubaanxd/Timelines.git
+git clone https://github.com/rubaanxd/ChronoMap.git
 cd Timelines
 ```
 
