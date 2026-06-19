@@ -106,7 +106,7 @@ El proyecto ha migrado de una arquitectura basada en Node.js a **HTML y JavaScri
 
 ### 🌐 Demo en Vivo
 Prueba ChronoMap directamente en tu navegador:
-👉 **[https://rubaanxd.github.io/Timelines/](https://rubaanxd.github.io/Timelines/)**
+👉 **[https://rubaanxd.github.io/ChronoMap/](https://rubaanxd.github.io/ChronoMap/)**
 
 ### Requisitos
 - Navegador web moderno (Chrome, Firefox, Safari, Edge)
