@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoMap - Línea de Tiempo Operativa</title>
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons (CDN) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- html2canvas (Para exportar a PNG) -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden; /* Previene scroll general de la página */
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .grab-cursor { cursor: grab; }
+        .grabbing-cursor { cursor: grabbing !important; }
+        .resize-x-cursor { cursor: col-resize; }
+    </style>
+</head>
+<body class="flex flex-col h-screen text-slate-900 selection:bg-blue-100">
+
+    <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/80 shrink-0 shadow-sm z-30">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-inner shadow-blue-500/20 flex items-center justify-center">
+                <i class="ph ph-clock text-white text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight flex items-baseline">
+                    ChronoMap
+                </h1>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <input type="file" id="file-input" accept=".json" class="hidden" />
+            <button onclick="document.getElementById('file-input').click()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Importar">
+                <i class="ph ph-folder-open text-lg"></i> <span class="hidden sm:inline">Importar</span>
+            </button>
+            <div class="w-px h-5 bg-slate-200 mx-1"></div>
+            <button onclick="exportToJson()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Exportar JSON">
+                <i class="ph ph-braces text-lg"></i> <span class="hidden sm:inline">JSON</span>
+            </button>
+            <button onclick="exportToImage()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Exportar PNG">
+                <i class="ph ph-image text-lg"></i> <span class="hidden sm:inline">PNG</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex items-center px-6 py-2 bg-white/50 backdrop-blur-sm border-b border-slate-200/50 shrink-0 space-x-4 z-20">
+        <button onclick="addNode()" class="flex items-center space-x-2 px-4 py-1.5 bg-white border border-slate-200 shadow-sm hover:border-blue-400 hover:text-blue-600 text-slate-700 text-sm font-medium rounded-lg transition-all">
+            <i class="ph ph-plus"></i>
+            <span>Nueva Actividad</span>
+        </button>
+        <div class="w-px h-4 bg-slate-300"></div>
+        <span class="text-xs text-slate-500 hidden sm:flex items-center">
+            <i class="ph ph-dots-six-vertical mr-1 opacity-50"></i> Arrastra para mover • Usa los bordes para extender
+        </span>
+        <div class="flex-1"></div>
+        
+        <!-- Controles de Zoom -->
+        <div class="flex items-center space-x-1 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
+            <button onclick="changeZoom(-0.5)" class="p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-md transition-colors" title="Alejar">
+                <i class="ph ph-magnifying-glass-minus text-lg"></i>
+            </button>
+            <span id="zoom-label" class="text-xs font-semibold text-slate-600 w-12 text-center select-none font-mono">100%</span>
+            <button onclick="changeZoom(0.5)" class="p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-md transition-colors" title="Acercar">
+                <i class="ph ph-magnifying-glass-plus text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <!-- Panel Izquierdo: Áreas -->
+        <div class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-[4px_0_12px_rgba(0,0,0,0.02)]">
+            <div class="h-10 border-b border-slate-100 bg-slate-50/50 flex items-center px-6">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <i class="ph ph-briefcase"></i> Áreas
+                </span>
+            </div>
+            <div id="areas-container" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1">
+                <!-- Las áreas se renderizan aquí -->
+            </div>
+        </div>
+
+        <!-- Contenedor Timeline -->
+        <div id="scroll-container" class="flex-1 overflow-auto bg-[#f8fafc] relative custom-scrollbar">
+            <!-- Este ID es clave para la exportación a imagen -->
+            <div id="timeline-wrapper" class="relative pb-20 bg-[#f8fafc]">
+                <!-- Regla de tiempo (Ruler) -->
+                <div id="time-ruler" class="h-10 border-b border-slate-200 bg-white sticky top-0 z-10 flex shadow-sm"></div>
+                <!-- Líneas de cuadrícula -->
+                <div id="grid-lines" class="absolute top-0 left-0 bottom-0 right-0 pointer-events-none flex"></div>
+                <!-- Carriles y Nodos -->
+                <div id="lanes-container" class="relative mt-3 px-3 space-y-1"></div>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Propiedades -->
+        <div id="properties-panel" class="w-[340px] bg-white border-l border-slate-200 flex flex-col shrink-0 shadow-2xl z-30 transition-all duration-300 hidden">
+            <!-- Se llena dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Mensaje Toast (Reemplazo de Alert) -->
+    <div id="toast-message" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-lg shadow-xl font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2">
+        <i class="ph ph-info text-lg text-blue-400"></i>
+        <span id="toast-text">Mensaje</span>
+    </div>
+
+    <!-- Pantalla de Carga (Bloquea interacciones durante procesos pesados) -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4">
+            <i class="ph ph-spinner-gap animate-spin text-blue-600 text-4xl mb-4"></i>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">Procesando</h3>
+            <p id="loading-text" class="text-sm text-slate-500 text-center">Por favor espera...</p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTES ---
+        const TOTAL_MINUTES = 24 * 60; // 1440
+        const SNAP_MINUTES = 15;
+
+        // --- ESTADO GLOBAL ---
+        let state = {
+            areas: [],
+            nodes: [],
+            zoom: 2, // pixelsPerMinute
+            selectedNodeId: null
+        };
+
+        // Estado de Interacción (Drag & Drop)
+        let interaction = null;
+
+        // --- INICIALIZACIÓN ---
+        function init() {
+            loadData();
+            setupEventListeners();
+            renderAll();
+        }
+
+        function loadData() {
+            const savedAreas = localStorage.getItem('chronomap_areas_vanilla');
+            const savedNodes = localStorage.getItem('chronomap_nodes_vanilla');
+            const savedZoom = localStorage.getItem('chronomap_zoom_vanilla');
+
+            if (savedAreas) {
+                state.areas = JSON.parse(savedAreas);
+            } else {
+                state.areas = [
+                    { id: 'a1', name: 'Línea', color: '#3b82f6', order: 1 },
+                    { id: 'a2', name: 'Batch', color: '#10b981', order: 2 },
+                    { id: 'a3', name: 'BackOffice', color: '#8b5cf6', order: 3 }
+                ];
+            }
+
+            if (savedNodes) {
+                state.nodes = JSON.parse(savedNodes);
+            } else {
+                state.nodes = [
+                    { id: 'n1', name: 'Revisión matutina', startTime: 480, endTime: 540, areaId: 'a1', color: '#eff6ff', description: 'Revisión de métricas', customFields: [] },
+                    { id: 'n2', name: 'Proceso Batch', startTime: 600, endTime: 720, areaId: 'a2', color: '#ecfdf5', description: '', customFields: [{ id: 'cf1', key: 'Ticket', value: 'B-102' }] }
+                ];
+            }
+
+            if (savedZoom) state.zoom = parseFloat(savedZoom);
+        }
+
+        function saveData() {
+            localStorage.setItem('chronomap_areas_vanilla', JSON.stringify(state.areas));
+            localStorage.setItem('chronomap_nodes_vanilla', JSON.stringify(state.nodes));
+            localStorage.setItem('chronomap_zoom_vanilla', state.zoom.toString());
+        }
+
+        function formatTime(minutes) {
+            const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+            const m = Math.floor(minutes % 60).toString().padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        function parseTime(timeString) {
+            if(!timeString) return 0;
+            const parts = timeString.split(':');
+            const h = parseInt(parts[0], 10) || 0;
+            const m = parseInt(parts[1], 10) || 0;
+            return (h * 60) + m;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-message');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            setTimeout(() => toast.classList.add('opacity-0', 'translate-y-4'), 3000);
+        }
+
+        function showLoading(msg) {
+            document.getElementById('loading-text').innerText = msg || 'Cargando...';
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function renderAll() {
+            document.getElementById('timeline-wrapper').style.width = `${TOTAL_MINUTES * state.zoom}px`;
+            document.getElementById('zoom-label').innerText = `${Math.round(state.zoom * 50)}%`;
+            
+            renderAreas();
+            renderRuler();
+            renderGrid();
+            renderTimeline();
+            renderPropertiesPanel();
+            saveData();
+        }
+
+        function renderAreas() {
+            const container = document.getElementById('areas-container');
+            let html = '';
+            
+            state.areas.forEach(area => {
+                html += `
+                <div class="group flex items-center h-16 bg-white border border-slate-100 hover:border-slate-200 rounded-xl px-3 transition-all hover:shadow-sm">
+                    <div class="w-3 h-3 rounded-md mr-3 shrink-0 shadow-sm" style="background-color: ${area.color}"></div>
+                    <input type="text" value="${area.name}" onchange="updateArea('${area.id}', this.value)" class="font-medium text-sm text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 w-full" />
+                    <button onclick="removeArea('${area.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0 ml-1" title="Eliminar Área">
+                        <i class="ph ph-trash text-base"></i>
+                    </button>
+                </div>`;
+            });
+            
+            html += `<button onclick="addArea()" class="w-full mt-2 py-3 text-sm text-slate-500 hover:text-blue-600 font-medium hover:bg-blue-50/50 rounded-xl border border-dashed border-slate-200 hover:border-blue-200 flex items-center justify-center transition-all">
+                        <i class="ph ph-plus mr-1"></i> Añadir Área
+                    </button>`;
+            container.innerHTML = html;
+        }
+
+        function renderRuler() {
+            const container = document.getElementById('time-ruler');
+            let html = '';
+            for (let i = 0; i < 24; i++) {
+                let marks = '';
+                if (state.zoom >= 1.5) marks += `<div class="absolute bottom-0 left-1/4 w-px h-1.5 bg-slate-200"></div>`;
+                if (state.zoom >= 0.8) marks += `<div class="absolute bottom-0 left-2/4 w-px h-2.5 bg-slate-300"></div>`;
+                if (state.zoom >= 1.5) marks += `<div class="absolute bottom-0 left-3/4 w-px h-1.5 bg-slate-200"></div>`;
+                
+                html += `
+                <div class="h-full border-r border-slate-100 relative flex items-end px-1.5 pb-1.5" style="width: ${60 * state.zoom}px">
+                    <span class="text-[10px] font-bold text-slate-400 select-none">${i.toString().padStart(2, '0')}:00</span>
+                    ${marks}
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('grid-lines');
+            let html = '';
+            for (let i = 0; i < 24; i++) {
+                html += `<div class="border-r border-slate-200/60 border-dashed h-full" style="width: ${60 * state.zoom}px"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('lanes-container');
+            let html = '';
+            
+            state.areas.forEach(area => {
+                const nodesInArea = state.nodes.filter(n => n.areaId === area.id);
+                let nodesHtml = nodesInArea.map(node => {
+                    const width = (node.endTime - node.startTime) * state.zoom;
+                    const left = node.startTime * state.zoom;
+                    const isSelected = state.selectedNodeId === node.id;
+                    const isInteracting = interaction && interaction.id === node.id;
+                    
+                    let classes = "absolute top-2 bottom-2 rounded-xl flex flex-col p-2.5 overflow-hidden transition-all duration-75 select-none group grab-cursor ";
+                    if (isSelected) classes += "ring-2 ring-blue-500 ring-offset-1 shadow-md z-10 ";
+                    else classes += "border border-slate-200/60 shadow-sm hover:shadow-md hover:border-slate-300 ";
+                    if (isInteracting) classes += "opacity-90 scale-[1.02] shadow-xl z-20 grabbing-cursor";
+
+                    let resizeHandles = '';
+                    if (isSelected) {
+                        resizeHandles = `
+                        <div class="absolute left-0 top-0 bottom-0 w-3 resize-x-cursor hover:bg-blue-500/10 flex items-center justify-center group/handle" onmousedown="startInteraction(event, '${node.id}', 'resize-left')">
+                            <div class="w-1 h-4 rounded-full bg-blue-400 opacity-0 group-hover/handle:opacity-100 transition-opacity"></div>
+                        </div>
+                        <div class="absolute right-0 top-0 bottom-0 w-3 resize-x-cursor hover:bg-blue-500/10 flex items-center justify-center group/handle" onmousedown="startInteraction(event, '${node.id}', 'resize-right')">
+                            <div class="w-1 h-4 rounded-full bg-blue-400 opacity-0 group-hover/handle:opacity-100 transition-opacity"></div>
+                        </div>`;
+                    }
+
+                    return `
+                    <div id="node-${node.id}" class="${classes}" style="left: ${left}px; width: ${width}px; background-color: ${node.color || '#ffffff'}" onmousedown="startInteraction(event, '${node.id}', 'move')">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 pointer-events-none" style="background-color: ${area.color}"></div>
+                        <div class="flex items-center justify-between mb-1 pointer-events-none pl-1">
+                            <span class="text-xs font-bold text-slate-700 truncate pr-2">${node.name}</span>
+                        </div>
+                        <div class="flex items-center text-[10px] text-slate-500 font-medium pointer-events-none pl-1">
+                            <i class="ph ph-clock mr-1 opacity-70"></i> ${formatTime(node.startTime)} - ${formatTime(node.endTime)}
+                        </div>
+                        ${resizeHandles}
+                    </div>`;
+                }).join('');
+
+                html += `<div class="h-[76px] relative rounded-xl border border-transparent hover:border-slate-200/50 hover:bg-slate-100/30 transition-colors" data-area-id="${area.id}">${nodesHtml}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderPropertiesPanel() {
+            const panel = document.getElementById('properties-panel');
+            const node = state.nodes.find(n => n.id === state.selectedNodeId);
+
+            if (!node) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            panel.classList.remove('hidden');
+
+            let areaOptions = state.areas.map(a => `<option value="${a.id}" ${node.areaId === a.id ? 'selected' : ''}>${a.name}</option>`).join('');
+            
+            let colorButtons = ['#ffffff', '#eff6ff', '#ecfdf5', '#fef2f2', '#fefce8', '#f5f3ff'].map(c => `
+                <button onclick="updateNodeProp('color', '${c}')" class="w-8 h-8 rounded-full border-2 transition-all ${node.color === c ? 'border-blue-500 scale-110 shadow-sm' : 'border-slate-200 hover:scale-105'}" style="background-color: ${c}"></button>
+            `).join('');
+
+            let customFieldsHtml = (node.customFields || []).map(cf => `
+                <div class="flex space-x-2 items-start group">
+                    <div class="flex-1 space-y-1">
+                        <input type="text" value="${cf.key}" onchange="updateCustomField('${cf.id}', 'key', this.value)" placeholder="Clave" class="w-full text-xs p-1.5 border-b border-transparent hover:border-slate-300 focus:border-blue-500 outline-none bg-transparent font-medium text-slate-600">
+                        <input type="text" value="${cf.value}" onchange="updateCustomField('${cf.id}', 'value', this.value)" placeholder="Valor" class="w-full text-sm p-1.5 bg-slate-50 border border-slate-200 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none">
+                    </div>
+                    <button onclick="removeCustomField('${cf.id}')" class="mt-6 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"><i class="ph ph-trash"></i></button>
+                </div>
+            `).join('');
+
+            if(customFieldsHtml === '') {
+                customFieldsHtml = `<div class="text-xs text-slate-400 italic text-center p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">No hay propiedades adicionales.</div>`;
+            }
+
+            panel.innerHTML = `
+                <div class="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="ph ph-sliders"></i> Detalles de Actividad</h2>
+                    <button onclick="selectNode(null)" class="text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 p-1 rounded-md transition-colors"><i class="ph ph-x"></i></button>
+                </div>
+                
+                <div class="p-5 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre</label>
+                            <input type="text" value="${node.name}" oninput="updateNodeProp('name', this.value)" class="w-full text-sm p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Área</label>
+                            <select onchange="updateNodeProp('areaId', this.value)" class="w-full text-sm p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer">
+                                ${areaOptions}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i class="ph ph-clock"></i> Inicio</label>
+                            <input type="time" value="${formatTime(node.startTime)}" onchange="updateNodeProp('startTime', this.value, true)" class="w-full text-sm p-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500/20 outline-none font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i class="ph ph-clock"></i> Fin</label>
+                            <input type="time" value="${formatTime(node.endTime)}" onchange="updateNodeProp('endTime', this.value, true)" class="w-full text-sm p-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500/20 outline-none font-mono">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Color</label>
+                        <div class="flex gap-2">${colorButtons}</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i class="ph ph-text-align-left"></i> Notas</label>
+                        <textarea oninput="updateNodeProp('description', this.value)" rows="3" class="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" placeholder="Detalles...">${node.description || ''}</textarea>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><i class="ph ph-tag"></i> Extra</label>
+                            <button onclick="addCustomField()" class="text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors uppercase">+ Añadir</button>
+                        </div>
+                        <div class="space-y-2">${customFieldsHtml}</div>
+                    </div>
+                </div>
+                
+                <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+                    <button onclick="deleteSelectedNode()" class="w-full py-2.5 text-sm text-red-600 font-bold hover:bg-red-50 rounded-lg transition-colors border border-red-200 shadow-sm">Eliminar Actividad</button>
+                </div>
+            `;
+        }
+
+        function setupEventListeners() {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.getElementById('scroll-container').addEventListener('mousedown', (e) => {
+                if (e.target.id === 'scroll-container' || e.target.id === 'timeline-wrapper') selectNode(null);
+            });
+            
+            document.getElementById('file-input').addEventListener('change', importFromJson);
+        }
+
+        function startInteraction(e, nodeId, mode) {
+            e.stopPropagation();
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            selectNode(nodeId);
+            
+            interaction = {
+                id: nodeId,
+                mode: mode,
+                startX: e.clientX,
+                initialStart: node.startTime,
+                initialEnd: node.endTime
+            };
+            
+            renderTimeline();
+        }
+
+        function handleMouseMove(e) {
+            if (!interaction) return;
+
+            const deltaX = e.clientX - interaction.startX;
+            const deltaMinutes = deltaX / state.zoom;
+            const nodeIndex = state.nodes.findIndex(n => n.id === interaction.id);
+            if (nodeIndex === -1) return;
+            
+            const n = state.nodes[nodeIndex];
+            let newStart = n.startTime;
+            let newEnd = n.endTime;
+            const minDur = 15;
+
+            if (interaction.mode === 'move') {
+                newStart = interaction.initialStart + deltaMinutes;
+                newStart = Math.round(newStart / SNAP_MINUTES) * SNAP_MINUTES;
+                const dur = interaction.initialEnd - interaction.initialStart;
+                
+                if (newStart < 0) newStart = 0;
+                if (newStart + dur > TOTAL_MINUTES) newStart = TOTAL_MINUTES - dur;
+                newEnd = newStart + dur;
+
+                const container = document.getElementById('scroll-container');
+                const rect = container.getBoundingClientRect();
+                if (e.clientY > rect.top + 40 && e.clientY < rect.bottom) {
+                    const scrollY = container.scrollTop;
+                    const relativeY = e.clientY - rect.top + scrollY - 40;
+                    const laneIndex = Math.floor(relativeY / 96);
+                    if (laneIndex >= 0 && laneIndex < state.areas.length) {
+                        n.areaId = state.areas[laneIndex].id;
+                    }
+                }
+            } else if (interaction.mode === 'resize-left') {
+                newStart = interaction.initialStart + deltaMinutes;
+                newStart = Math.round(newStart / SNAP_MINUTES) * SNAP_MINUTES;
+                if (newStart < 0) newStart = 0;
+                if (newStart > n.endTime - minDur) newStart = n.endTime - minDur;
+            } else if (interaction.mode === 'resize-right') {
+                newEnd = interaction.initialEnd + deltaMinutes;
+                newEnd = Math.round(newEnd / SNAP_MINUTES) * SNAP_MINUTES;
+                if (newEnd > TOTAL_MINUTES) newEnd = TOTAL_MINUTES;
+                if (newEnd < n.startTime + minDur) newEnd = n.startTime + minDur;
+            }
+
+            n.startTime = newStart;
+            n.endTime = newEnd;
+            
+            renderTimeline();
+            if(interaction.mode === 'resize-left' || interaction.mode === 'resize-right' || interaction.mode === 'move'){
+                 renderPropertiesPanel(); 
+            }
+        }
+
+        function handleMouseUp() {
+            if (interaction) {
+                interaction = null;
+                renderAll(); 
+            }
+        }
+
+        function selectNode(id) {
+            state.selectedNodeId = id;
+            renderAll();
+        }
+
+        function changeZoom(delta) {
+            let newZoom = state.zoom + delta;
+            if (newZoom < 0.5) newZoom = 0.5;
+            if (newZoom > 5) newZoom = 5;
+            state.zoom = newZoom;
+            renderAll();
+        }
+
+        function addArea() {
+            state.areas.push({
+                id: 'a' + Date.now(),
+                name: 'Nueva Área',
+                color: '#94a3b8',
+                order: state.areas.length + 1
+            });
+            renderAll();
+            showToast("Área añadida");
+        }
+
+        function updateArea(id, name) {
+            const area = state.areas.find(a => a.id === id);
+            if (area) area.name = name;
+            renderAll();
+        }
+
+        function removeArea(id) {
+            state.areas = state.areas.filter(a => a.id !== id);
+            state.nodes = state.nodes.filter(n => n.areaId !== id);
+            if (state.selectedNodeId && !state.nodes.find(n => n.id === state.selectedNodeId)) {
+                state.selectedNodeId = null;
+            }
+            renderAll();
+            showToast("Área eliminada");
+        }
+
+        function addNode() {
+            if (state.areas.length === 0) {
+                showToast("Por favor, crea un Área primero.");
+                return;
+            }
+            const newNode = {
+                id: 'n' + Date.now(),
+                name: 'Nueva Actividad',
+                startTime: 480,
+                endTime: 540,
+                areaId: state.areas[0].id,
+                color: '#ffffff',
+                description: '',
+                customFields: []
+            };
+            state.nodes.push(newNode);
+            state.selectedNodeId = newNode.id;
+            renderAll();
+            showToast("Actividad creada");
+        }
+
+        function updateNodeProp(prop, value, isTime = false) {
+            const node = state.nodes.find(n => n.id === state.selectedNodeId);
+            if (!node) return;
+            node[prop] = isTime ? parseTime(value) : value;
+            renderAll();
+        }
+
+        function deleteSelectedNode() {
+            state.nodes = state.nodes.filter(n => n.id !== state.selectedNodeId);
+            state.selectedNodeId = null;
+            renderAll();
+            showToast("Actividad eliminada");
+        }
+
+        function addCustomField() {
+            const node = state.nodes.find(n => n.id === state.selectedNodeId);
+            if (!node) return;
+            if(!node.customFields) node.customFields = [];
+            node.customFields.push({ id: 'cf' + Date.now(), key: 'Nueva Propiedad', value: '' });
+            renderAll();
+        }
+
+        function updateCustomField(fieldId, prop, value) {
+            const node = state.nodes.find(n => n.id === state.selectedNodeId);
+            if (!node) return;
+            const field = node.customFields.find(cf => cf.id === fieldId);
+            if(field) field[prop] = value;
+            saveData(); 
+        }
+
+        function removeCustomField(fieldId) {
+            const node = state.nodes.find(n => n.id === state.selectedNodeId);
+            if (!node) return;
+            node.customFields = node.customFields.filter(cf => cf.id !== fieldId);
+            renderAll();
+        }
+
+        function exportToJson() {
+            showLoading("Compilando datos del proyecto...");
+            
+            setTimeout(() => {
+                const dataToExport = {
+                    version: '1.0',
+                    timestamp: new Date().toISOString(),
+                    areas: state.areas,
+                    nodes: state.nodes,
+                    settings: { zoom: state.zoom }
+                };
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `chronomap-${new Date().getTime()}.json`);
+                document.body.appendChild(downloadAnchorNode); 
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                hideLoading();
+                showToast("Proyecto exportado exitosamente");
+            }, 600);
+        }
+
+        function importFromJson(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showLoading("Analizando e importando archivo...");
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setTimeout(() => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        if (importedData.areas && importedData.nodes) {
+                            state.areas = importedData.areas;
+                            state.nodes = importedData.nodes;
+                            if (importedData.settings && importedData.settings.zoom) {
+                                state.zoom = importedData.settings.zoom;
+                            }
+                            state.selectedNodeId = null;
+                            renderAll();
+                            hideLoading();
+                            showToast("Proyecto importado exitosamente");
+                        } else {
+                            hideLoading();
+                            showToast("El archivo no tiene el formato de ChronoMap.");
+                        }
+                    } catch (error) {
+                        hideLoading();
+                        showToast("Error: JSON inválido o corrupto.");
+                    }
+                }, 600);
+                e.target.value = null;
+            };
+            reader.readAsText(file);
+        }
+
+        function exportToImage() {
+            showLoading("Renderizando imagen de alta calidad... Esto puede tardar unos segundos.");
+            
+            setTimeout(() => {
+                const prevSelected = state.selectedNodeId;
+                selectNode(null);
+
+                const elementToCapture = document.getElementById('timeline-wrapper');
+                
+                const originalBackground = elementToCapture.style.backgroundColor;
+                elementToCapture.style.backgroundColor = '#f8fafc';
+
+                html2canvas(elementToCapture, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#f8fafc'
+                }).then(canvas => {
+                    elementToCapture.style.backgroundColor = originalBackground;
+                    if(prevSelected) selectNode(prevSelected);
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = imgData;
+                    downloadLink.download = `chronomap-timeline-${new Date().getTime()}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    
+                    hideLoading();
+                    showToast("Línea de tiempo guardada como imagen.");
+                }).catch(err => {
+                    console.error("Error capturando imagen:", err);
+                    if(prevSelected) selectNode(prevSelected);
+                    hideLoading();
+                    showToast("Hubo un problema al generar la imagen.");
+                });
+            }, 800);
+        }
+
+        // Arrancar aplicación
+        init();
+    </script>
+</body>
+</html>
