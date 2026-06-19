@@ -45,3 +45,6 @@ coverage/
 # Misc
 *.bak
 *.backup
+
+# Context folder (AI documentation)
+.context/
