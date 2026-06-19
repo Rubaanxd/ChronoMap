@@ -332,6 +332,13 @@
             <button onclick="exportToImage()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Exportar PNG">
                 <i class="ph ph-image text-lg"></i> <span class="hidden sm:inline">PNG</span>
             </button>
+            <button onclick="exportToHtml()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Exportar HTML">
+                <i class="ph ph-file-html text-lg"></i> <span class="hidden sm:inline">HTML</span>
+            </button>
+            <div class="w-px h-5 bg-slate-200 mx-1"></div>
+            <button onclick="shareWithLink()" class="p-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Compartir con Link">
+                <i class="ph ph-share-network text-lg"></i> <span class="hidden sm:inline">Compartir</span>
+            </button>
         </div>
     </header>
 
@@ -539,11 +546,53 @@
             // Detectar modo de vista desde URL
             const urlParams = new URLSearchParams(window.location.search);
             const viewParam = urlParams.get('view');
+            const dataParam = urlParams.get('data');
+            
             if (viewParam === 'readonly' || viewParam === 'presentation') {
                 state.viewMode = viewParam;
             }
             
-            loadData();
+            // Cargar datos desde URL si existe
+            if (dataParam) {
+                try {
+                    const jsonStr = decodeURIComponent(escape(atob(dataParam)));
+                    const shareData = JSON.parse(jsonStr);
+                    
+                    // Convertir formato comprimido a formato completo
+                    if (shareData.a && shareData.n) {
+                        state.areas = shareData.a.map(a => ({
+                            id: a.i,
+                            name: a.n,
+                            color: a.c
+                        }));
+                        
+                        state.nodes = shareData.n.map(n => ({
+                            id: n.i,
+                            name: n.n,
+                            startTime: n.s,
+                            endTime: n.e,
+                            areaId: n.a,
+                            color: n.c,
+                            description: n.d || '',
+                            status: n.st || 'pending',
+                            priority: n.p || 'medium',
+                            dependencies: n.dp || [],
+                            customFields: [],
+                            sublane: 0,
+                            tags: []
+                        }));
+                        
+                        state.viewMode = 'readonly'; // Forzar modo readonly
+                    }
+                } catch (err) {
+                    console.error('Error al cargar datos desde URL:', err);
+                    showToast('⚠️ Error al cargar datos compartidos');
+                    loadData(); // Cargar datos normales
+                }
+            } else {
+                loadData();
+            }
+            
             setupEventListeners();
             renderAll();
             
@@ -1785,6 +1834,151 @@
                     showToast("❌ Error al generar imagen."); 
                 });
             }, 800);
+        }
+        
+        function shareWithLink() {
+            showLoading("Generando link...");
+            setTimeout(() => {
+                try {
+                    // Crear objeto con datos mínimos
+                    const shareData = {
+                        v: '1.0', // version
+                        a: state.areas.map(area => ({
+                            i: area.id,
+                            n: area.name,
+                            c: area.color
+                        })),
+                        n: state.nodes.map(node => ({
+                            i: node.id,
+                            n: node.name,
+                            s: node.startTime,
+                            e: node.endTime,
+                            a: node.areaId,
+                            c: node.color,
+                            d: node.description || '',
+                            st: node.status || 'pending',
+                            p: node.priority || 'medium',
+                            dp: node.dependencies || []
+                        }))
+                    };
+                    
+                    // Comprimir a Base64
+                    const jsonStr = JSON.stringify(shareData);
+                    const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                    
+                    // Crear URL
+                    const url = `${window.location.origin}${window.location.pathname}?data=${base64}&view=readonly`;
+                    
+                    // Copiar al portapapeles
+                    navigator.clipboard.writeText(url).then(() => {
+                        hideLoading();
+                        showToast("✅ Link copiado al portapapeles");
+                        
+                        // Mostrar modal con el link
+                        showShareModal(url);
+                    }).catch(() => {
+                        hideLoading();
+                        showToast("⚠️ No se pudo copiar. Usa el modal.");
+                        showShareModal(url);
+                    });
+                } catch (err) {
+                    hideLoading();
+                    showToast("❌ Error al generar link");
+                    console.error(err);
+                }
+            }, 300);
+        }
+        
+        function showShareModal(url) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full mx-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="ph ph-share-network text-blue-600"></i>
+                            Compartir Timeline
+                        </h3>
+                        <button onclick="this.closest('.fixed').remove()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                            <i class="ph ph-x text-slate-500"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4">Comparte este link para que otros vean tu timeline en modo solo lectura:</p>
+                    <div class="flex gap-2">
+                        <input type="text" value="${url}" readonly class="flex-1 text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg font-mono text-slate-700" id="share-url-input" />
+                        <button onclick="navigator.clipboard.writeText('${url}'); showToast('✅ Copiado')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
+                            <i class="ph ph-copy"></i> Copiar
+                        </button>
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-xs text-blue-800 flex items-start gap-2">
+                            <i class="ph ph-info text-lg shrink-0"></i>
+                            <span>El link contiene todos los datos comprimidos. Los usuarios podrán ver el timeline pero no editarlo.</span>
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Seleccionar el texto automáticamente
+            setTimeout(() => {
+                const input = document.getElementById('share-url-input');
+                if (input) input.select();
+            }, 100);
+            
+            // Cerrar al hacer click fuera
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+        
+        function exportToHtml() {
+            showLoading("Generando HTML...");
+            setTimeout(() => {
+                try {
+                    // Obtener el HTML actual
+                    const htmlContent = document.documentElement.outerHTML;
+                    
+                    // Inyectar datos en el HTML
+                    const dataScript = `
+                        <script>
+                            // Auto-cargar datos al abrir el HTML
+                            window.addEventListener('DOMContentLoaded', function() {
+                                const preloadedData = ${JSON.stringify({ areas: state.areas, nodes: state.nodes, zoom: state.zoom })};
+                                if (typeof state !== 'undefined') {
+                                    state.areas = preloadedData.areas;
+                                    state.nodes = preloadedData.nodes;
+                                    state.zoom = preloadedData.zoom || 2;
+                                    state.viewMode = 'readonly';
+                                    renderAll();
+                                    applyViewMode();
+                                }
+                            });
+                        <\/script>
+                    `;
+                    
+                    // Insertar el script antes del cierre de body
+                    const modifiedHtml = htmlContent.replace('</body>', dataScript + '</body>');
+                    
+                    // Crear blob y descargar
+                    const blob = new Blob([modifiedHtml], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `chronomap-${Date.now()}.html`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    
+                    hideLoading();
+                    showToast("✅ HTML exportado exitosamente");
+                } catch (err) {
+                    hideLoading();
+                    showToast("❌ Error al exportar HTML");
+                    console.error(err);
+                }
+            }, 600);
         }
 
         init();
