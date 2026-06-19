@@ -116,7 +116,7 @@ Prueba ChronoMap directamente en tu navegador:
 1. Clona el repositorio:
 ```bash
 git clone https://github.com/rubaanxd/ChronoMap.git
-cd Timelines
+cd ChronoMap
 ```
 
 2. Abre el archivo `ChronoMap.html` en tu navegador:
@@ -134,7 +134,7 @@ Este proyecto está configurado para desplegarse automáticamente en GitHub Page
    - Source: GitHub Actions
    - El workflow `.github/workflows/deploy.yml` se ejecutará automáticamente
 3. **Accede a tu sitio**:
-   - URL: `https://tu-usuario.github.io/Timelines/`
+   - URL: `https://tu-usuario.github.io/ChronoMap/`
    - El despliegue toma ~2 minutos
 
 **Archivos importantes para GitHub Pages:**
