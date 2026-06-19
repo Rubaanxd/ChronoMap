@@ -15,45 +15,280 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
+        /* CSS Variables para Temas */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-quaternary: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border-primary: #e2e8f0;
+            --border-secondary: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --overlay-bg: rgba(0, 0, 0, 0.5);
+        }
+        
+        body.theme-dark {
+            --bg-primary: #1e293b;
+            --bg-secondary: #334155;
+            --bg-tertiary: #475569;
+            --bg-quaternary: #64748b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-primary: #475569;
+            --border-secondary: #64748b;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.6);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.8);
+            --overlay-bg: rgba(0, 0, 0, 0.8);
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            overflow: hidden; 
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 4px; transition: background 0.2s; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
 
         .grab-cursor { cursor: grab; }
         .grabbing-cursor { cursor: grabbing !important; }
         .resize-x-cursor { cursor: col-resize; }
         
         /* Context Menu */
-        .context-menu { position: fixed; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px; padding: 4px; }
-        .context-menu-item { padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: all 0.15s; }
-        .context-menu-item:hover { background-color: #f1f5f9; }
+        .context-menu { position: fixed; background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 1000; min-width: 180px; padding: 4px; transition: all 0.3s; }
+        .context-menu-item { padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: all 0.15s; color: var(--text-primary); }
+        .context-menu-item:hover { background-color: var(--bg-tertiary); }
         .context-menu-item.danger:hover { background-color: #fee2e2; color: #dc2626; }
-        .context-menu-divider { height: 1px; background-color: #e2e8f0; margin: 4px 0; }
+        .context-menu-divider { height: 1px; background-color: var(--border-primary); margin: 4px 0; }
         
         /* Sublane & Modal styles */
-        .sublane-divider { border-top: 1px dashed #e2e8f0; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sublane-divider { border-top: 1px dashed var(--border-primary); }
+        .modal-overlay { position: fixed; inset: 0; background: var(--overlay-bg); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal { background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 500px; width: 90%; max-height: 85vh; overflow: hidden; transform: scale(0.9); transition: transform 0.3s; }
+        .modal { background: var(--bg-secondary); border-radius: 16px; box-shadow: var(--shadow-lg); max-width: 500px; width: 90%; max-height: 85vh; overflow: hidden; transform: scale(0.9); transition: transform 0.3s, background 0.3s; }
         .modal-overlay.active .modal { transform: scale(1); }
         
         /* Area labels & panels */
         .area-background { position: absolute; left: 0; right: 0; top: 0; bottom: 0; pointer-events: none; opacity: 0.05; }
-        .area-label { position: sticky; left: 12px; top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .area-label { position: sticky; left: 12px; top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--bg-secondary); backdrop-filter: blur(8px); border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5; box-shadow: var(--shadow-sm); border: 1px solid var(--border-primary); transition: all 0.3s; }
         .panel-collapsed { width: 0 !important; min-width: 0 !important; overflow: hidden; }
-        .collapse-btn { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 24px; height: 48px; background: white; border: 1px solid #e2e8f0; border-radius: 0 8px 8px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 25; transition: all 0.2s; }
-        .collapse-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .collapse-btn { 
+            position: fixed; 
+            left: 256px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 32px; 
+            height: 64px; 
+            background: var(--bg-secondary); 
+            border: 1px solid var(--border-primary); 
+            border-left: none;
+            border-radius: 0 12px 12px 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            z-index: 30; 
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+        .collapse-btn:hover { 
+            background: var(--bg-tertiary); 
+            border-color: var(--border-secondary);
+            width: 36px;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Adaptaciones para tema oscuro */
+        body.theme-dark header { background: var(--bg-secondary) !important; border-color: var(--border-primary) !important; }
+        body.theme-dark .bg-white { background: var(--bg-secondary) !important; }
+        body.theme-dark .bg-slate-50 { background: var(--bg-tertiary) !important; }
+        body.theme-dark .bg-slate-100 { background: var(--bg-tertiary) !important; }
+        body.theme-dark .bg-slate-50\/50 { background: rgba(71, 85, 105, 0.5) !important; }
+        body.theme-dark .bg-white\/50 { background: rgba(51, 65, 85, 0.5) !important; }
+        body.theme-dark .border-slate-200 { border-color: var(--border-primary) !important; }
+        body.theme-dark .border-slate-300 { border-color: var(--border-secondary) !important; }
+        body.theme-dark .border-slate-100 { border-color: var(--border-primary) !important; }
+        body.theme-dark .text-slate-800 { color: var(--text-primary) !important; }
+        body.theme-dark .text-slate-700 { color: var(--text-primary) !important; }
+        body.theme-dark .text-slate-600 { color: var(--text-secondary) !important; }
+        body.theme-dark .text-slate-500 { color: var(--text-secondary) !important; }
+        body.theme-dark .text-slate-400 { color: var(--text-tertiary) !important; }
+        
+        /* Modal mejorado en modo oscuro */
+        body.theme-dark .modal {
+            background: #1e293b !important;
+            border: 2px solid #475569;
+        }
+        body.theme-dark .modal h3 {
+            color: #f8fafc !important;
+            font-weight: 700;
+        }
+        body.theme-dark .modal label {
+            color: #e2e8f0 !important;
+            font-weight: 600;
+        }
+        body.theme-dark .modal input[type="text"],
+        body.theme-dark .modal input[type="time"],
+        body.theme-dark .modal select,
+        body.theme-dark .modal textarea {
+            background: #0f172a !important;
+            color: #f8fafc !important;
+            border: 2px solid #475569 !important;
+            font-weight: 500;
+        }
+        body.theme-dark .modal input[type="text"]:focus,
+        body.theme-dark .modal input[type="time"]:focus,
+        body.theme-dark .modal select:focus,
+        body.theme-dark .modal textarea:focus {
+            background: #1e293b !important;
+            border-color: #3b82f6 !important;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4) !important;
+        }
+        body.theme-dark .modal input::placeholder,
+        body.theme-dark .modal textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+        
+        /* Botones del modal en modo oscuro */
+        body.theme-dark .modal button {
+            color: #f8fafc !important;
+            font-weight: 600;
+        }
+        body.theme-dark .modal button:not(.bg-red-600):not(.bg-blue-600):not(.text-red-600) {
+            background: #334155 !important;
+            border-color: #475569 !important;
+        }
+        body.theme-dark .modal button:not(.bg-red-600):not(.bg-blue-600):not(.text-red-600):hover {
+            background: #475569 !important;
+            border-color: #64748b !important;
+        }
+        body.theme-dark .modal .bg-blue-600 {
+            background: #2563eb !important;
+            color: #ffffff !important;
+        }
+        body.theme-dark .modal .bg-blue-600:hover {
+            background: #1d4ed8 !important;
+        }
+        body.theme-dark .modal .text-red-600 {
+            color: #f87171 !important;
+            background: #7f1d1d !important;
+            border-color: #991b1b !important;
+        }
+        body.theme-dark .modal .text-red-600:hover {
+            background: #991b1b !important;
+            color: #fca5a5 !important;
+        }
+        
+        /* Selectores de color en modal oscuro */
+        body.theme-dark .modal input[type="color"] {
+            border: 3px solid #64748b !important;
+            background: #0f172a !important;
+        }
+        body.theme-dark .modal input[type="color"]:hover {
+            border-color: #94a3b8 !important;
+        }
+        
+        /* Secciones del modal */
+        body.theme-dark .modal .border-t {
+            border-color: #475569 !important;
+        }
+        body.theme-dark .modal .bg-slate-50\/50 {
+            background: #0f172a !important;
+        }
+        body.theme-dark button { color: var(--text-secondary) !important; }
+        body.theme-dark button:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
+        body.theme-dark input, body.theme-dark select, body.theme-dark textarea { 
+            background: var(--bg-tertiary) !important; 
+            color: var(--text-primary) !important; 
+            border-color: var(--border-primary) !important; 
+        }
+        body.theme-dark input::placeholder { color: var(--text-tertiary) !important; }
+        body.theme-dark .shadow-sm { box-shadow: var(--shadow-sm) !important; }
+        body.theme-dark .shadow-md { box-shadow: var(--shadow-md) !important; }
+        body.theme-dark .shadow-lg { box-shadow: var(--shadow-lg) !important; }
+        body.theme-dark .shadow-xl { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9) !important; }
+        body.theme-dark .shadow-2xl { box-shadow: 0 25px 50px rgba(0, 0, 0, 0.95) !important; }
+        
+        /* Timeline específico para modo oscuro */
+        body.theme-dark #scroll-container { background: var(--bg-primary) !important; }
+        body.theme-dark #timeline-wrapper { background: var(--bg-primary) !important; }
+        body.theme-dark #time-ruler { background: var(--bg-secondary) !important; border-color: var(--border-primary) !important; }
+        body.theme-dark #grid-lines > div { border-color: var(--border-primary) !important; opacity: 0.3; }
+        body.theme-dark #areas-panel { background: var(--bg-secondary) !important; border-color: var(--border-primary) !important; }
+        body.theme-dark .w-px { background: var(--border-primary) !important; }
+        
+        /* Nodos/Actividades en modo oscuro */
+        body.theme-dark #lanes-container > div { 
+            background: var(--bg-secondary) !important; 
+            border-color: var(--border-primary) !important; 
+        }
+        body.theme-dark #lanes-container > div:hover { 
+            border-color: var(--border-secondary) !important; 
+        }
+        
+        /* Mejorar contraste de actividades en modo oscuro */
+        body.theme-dark .grab-cursor {
+            border: 2px solid rgba(148, 163, 184, 0.5) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+            filter: brightness(1.1) saturate(1.2);
+        }
+        body.theme-dark .grab-cursor:hover {
+            border-color: rgba(148, 163, 184, 0.8) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) inset !important;
+            filter: brightness(1.15) saturate(1.3);
+        }
+        body.theme-dark .grab-cursor .text-slate-700 {
+            color: #1e293b !important;
+            font-weight: 700 !important;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(255, 255, 255, 0.5);
+        }
+        body.theme-dark .grab-cursor .text-slate-500 {
+            color: #334155 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+        }
+        
+        /* Áreas mejoradas en modo oscuro */
+        body.theme-dark #areas-container > div {
+            background: var(--bg-tertiary) !important;
+            border-color: var(--border-primary) !important;
+        }
+        body.theme-dark #areas-container > div:hover {
+            border-color: var(--border-secondary) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+        }
+        body.theme-dark #areas-container input[type="color"] {
+            border-color: var(--border-secondary) !important;
+        }
+        body.theme-dark #areas-container input[type="text"] {
+            color: var(--text-primary) !important;
+        }
+        body.theme-dark #areas-container button[onclick^="addArea"] {
+            background: var(--bg-tertiary) !important;
+            border-color: var(--border-primary) !important;
+            color: var(--text-secondary) !important;
+        }
+        body.theme-dark #areas-container button[onclick^="addArea"]:hover {
+            background: var(--bg-secondary) !important;
+            border-color: #3b82f6 !important;
+            color: #3b82f6 !important;
+        }
     </style>
 </head>
-<body class="flex flex-col h-screen text-slate-900 selection:bg-blue-100">
+<body class="flex flex-col h-screen selection:bg-blue-100">
 
     <!-- SVGs para las flechas de dependencias -->
     <svg width="0" height="0" class="absolute pointer-events-none">
@@ -79,6 +314,10 @@
             </div>
         </div>
         <div class="flex items-center space-x-2">
+            <button onclick="toggleTheme()" id="theme-toggle" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Cambiar tema">
+                <i id="theme-icon" class="ph ph-moon text-lg"></i>
+            </button>
+            <div class="w-px h-5 bg-slate-200 mx-1"></div>
             <input type="file" id="file-input" accept=".json" class="hidden" />
             <button onclick="document.getElementById('file-input').click()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all flex items-center gap-2 text-sm font-medium" title="Importar">
                 <i class="ph ph-folder-open text-lg"></i> <span class="hidden sm:inline">Importar</span>
@@ -120,10 +359,11 @@
     </div>
 
     <div class="flex flex-1 overflow-hidden relative">
+        <button id="collapse-panel-btn" class="collapse-btn" onclick="togglePanel()" title="Colapsar/Expandir panel">
+            <i id="collapse-icon" class="ph ph-caret-left text-slate-500"></i>
+        </button>
+        
         <div id="areas-panel" class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-[4px_0_12px_rgba(0,0,0,0.02)] transition-all duration-300 relative">
-            <button id="collapse-panel-btn" class="collapse-btn" onclick="togglePanel()" title="Colapsar/Expandir panel">
-                <i id="collapse-icon" class="ph ph-caret-left text-slate-500"></i>
-            </button>
             <div class="h-10 border-b border-slate-100 bg-slate-50/50 flex items-center px-6">
                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <i class="ph ph-briefcase"></i> Áreas
@@ -190,7 +430,8 @@
             zoom: 2,
             selectedNodeId: null,
             copiedNode: null,
-            isPanelCollapsed: false
+            isPanelCollapsed: false,
+            theme: 'light'
         };
 
         let interaction = null;
@@ -199,6 +440,25 @@
             loadData();
             setupEventListeners();
             renderAll();
+        }
+        
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            applyTheme(state.theme);
+            localStorage.setItem('chronomap_theme_vanilla', state.theme);
+        }
+        
+        function applyTheme(theme) {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (theme === 'dark') {
+                body.classList.add('theme-dark');
+                icon.className = 'ph ph-sun text-lg';
+            } else {
+                body.classList.remove('theme-dark');
+                icon.className = 'ph ph-moon text-lg';
+            }
         }
 
         function loadData() {
@@ -233,6 +493,12 @@
             if (savedZoom) state.zoom = parseFloat(savedZoom);
             const savedPanelState = localStorage.getItem('chronomap_panel_collapsed_vanilla');
             if (savedPanelState) state.isPanelCollapsed = savedPanelState === 'true';
+            
+            const savedTheme = localStorage.getItem('chronomap_theme_vanilla');
+            if (savedTheme) {
+                state.theme = savedTheme;
+                applyTheme(savedTheme);
+            }
         }
 
         function saveData() {
@@ -313,12 +579,15 @@
             document.getElementById('zoom-label').innerText = `${Math.round(state.zoom * 50)}%`;
             
             const panel = document.getElementById('areas-panel');
+            const btn = document.getElementById('collapse-panel-btn');
             const icon = document.getElementById('collapse-icon');
             if (state.isPanelCollapsed) {
                 panel.classList.add('panel-collapsed');
+                btn.style.left = '0px';
                 icon.className = 'ph ph-caret-right text-slate-500';
             } else {
                 panel.classList.remove('panel-collapsed');
+                btn.style.left = '256px';
                 icon.className = 'ph ph-caret-left text-slate-500';
             }
             
@@ -333,32 +602,118 @@
             let html = '';
             state.areas.forEach(area => {
                 html += `
-                <div class="group flex items-center h-16 bg-white border border-slate-100 hover:border-slate-200 rounded-xl px-3 transition-all hover:shadow-sm">
-                    <input type="color" value="${area.color}" onchange="updateAreaColor('${area.id}', this.value)" class="w-6 h-6 rounded-md mr-3 shrink-0 cursor-pointer border-0" />
-                    <input type="text" value="${area.name}" onchange="updateArea('${area.id}', this.value)" class="font-medium text-sm text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 w-full" />
-                    <button onclick="removeArea('${area.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0 ml-1"><i class="ph ph-trash text-base"></i></button>
+                <div class="group relative flex items-center h-16 bg-white border-2 border-slate-100 hover:border-slate-300 rounded-xl px-3 transition-all hover:shadow-md overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 transition-all" style="background: ${area.color};"></div>
+                    <div class="flex items-center gap-3 w-full pl-2">
+                        <div class="relative">
+                            <input type="color" value="${area.color}" onchange="updateAreaColor('${area.id}', this.value)" class="w-8 h-8 rounded-lg cursor-pointer border-2 border-slate-200 hover:border-slate-300 transition-all" style="background: ${area.color};" />
+                            <div class="absolute inset-0 rounded-lg pointer-events-none" style="background: ${area.color}; opacity: 0.2;"></div>
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <input type="text" value="${area.name}" onchange="updateArea('${area.id}', this.value)" class="font-semibold text-sm text-slate-700 bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 w-full" />
+                            <span class="text-[10px] text-slate-400 px-2">ID: ${area.id}</span>
+                        </div>
+                        <button onclick="removeArea('${area.id}')" class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0">
+                            <i class="ph ph-trash text-base"></i>
+                        </button>
+                    </div>
                 </div>`;
             });
-            html += `<button onclick="addArea()" class="w-full mt-2 py-3 text-sm text-slate-500 hover:text-blue-600 font-medium hover:bg-blue-50/50 rounded-xl border border-dashed border-slate-200 hover:border-blue-200 flex items-center justify-center transition-all"><i class="ph ph-plus mr-1"></i> Añadir Área</button>`;
+            html += `<button onclick="addArea()" class="w-full mt-3 py-3.5 text-sm text-slate-500 hover:text-blue-600 font-semibold hover:bg-blue-50 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-300 flex items-center justify-center gap-2 transition-all group">
+                        <i class="ph ph-plus text-lg group-hover:scale-110 transition-transform"></i> 
+                        <span>Añadir Área</span>
+                     </button>`;
             document.getElementById('areas-container').innerHTML = html;
         }
 
         function renderRuler() {
             let html = '';
+            const hourWidth = 60 * state.zoom;
+            
             for (let i = 0; i < 24; i++) {
                 let marks = '';
-                if (state.zoom >= 1.5) marks += `<div class="absolute bottom-0 left-1/4 w-px h-1.5 bg-slate-200"></div>`;
-                if (state.zoom >= 0.8) marks += `<div class="absolute bottom-0 left-2/4 w-px h-2.5 bg-slate-300"></div>`;
-                if (state.zoom >= 1.5) marks += `<div class="absolute bottom-0 left-3/4 w-px h-1.5 bg-slate-200"></div>`;
-                html += `<div class="h-full border-r border-slate-100 relative flex items-end px-1.5 pb-1.5" style="width: ${60 * state.zoom}px"><span class="text-[10px] font-bold text-slate-400 select-none">${i.toString().padStart(2, '0')}:00</span>${marks}</div>`;
+                let labels = '';
+                
+                // Zoom muy alto (>= 8): Mostrar cada 5 minutos
+                if (state.zoom >= 8) {
+                    for (let m = 5; m < 60; m += 5) {
+                        const pos = (m / 60) * 100;
+                        const height = m % 15 === 0 ? '4' : '2';
+                        const opacity = m % 15 === 0 ? '0.5' : '0.3';
+                        marks += `<div class="absolute bottom-0 w-px bg-slate-300" style="left: ${pos}%; height: ${height}px; opacity: ${opacity};"></div>`;
+                        if (m % 15 === 0) {
+                            labels += `<span class="absolute bottom-0 text-[9px] text-slate-400" style="left: ${pos}%; transform: translateX(-50%);">${m}</span>`;
+                        }
+                    }
+                }
+                // Zoom alto (>= 4): Mostrar cada 10 minutos
+                else if (state.zoom >= 4) {
+                    for (let m = 10; m < 60; m += 10) {
+                        const pos = (m / 60) * 100;
+                        const height = m % 30 === 0 ? '4' : '2.5';
+                        marks += `<div class="absolute bottom-0 w-px h-${height} bg-slate-300" style="left: ${pos}%; opacity: 0.4;"></div>`;
+                        if (m % 30 === 0) {
+                            labels += `<span class="absolute bottom-0 text-[9px] text-slate-400" style="left: ${pos}%; transform: translateX(-50%);">${m}</span>`;
+                        }
+                    }
+                }
+                // Zoom medio (>= 2): Mostrar cada 15 minutos
+                else if (state.zoom >= 2) {
+                    marks += `<div class="absolute bottom-0 left-1/4 w-px h-2 bg-slate-200 opacity-40"></div>`;
+                    marks += `<div class="absolute bottom-0 left-2/4 w-px h-3 bg-slate-300 opacity-50"></div>`;
+                    marks += `<div class="absolute bottom-0 left-3/4 w-px h-2 bg-slate-200 opacity-40"></div>`;
+                    labels += `<span class="absolute bottom-0 left-1/2 text-[9px] text-slate-400 transform -translate-x-1/2">30</span>`;
+                }
+                // Zoom bajo (>= 0.8): Solo mostrar 30 minutos
+                else if (state.zoom >= 0.8) {
+                    marks += `<div class="absolute bottom-0 left-2/4 w-px h-2.5 bg-slate-300 opacity-40"></div>`;
+                }
+                
+                html += `<div class="h-full border-r border-slate-100 relative flex items-end px-1.5 pb-1.5" style="width: ${hourWidth}px">
+                            <span class="text-[10px] font-bold text-slate-400 select-none">${i.toString().padStart(2, '0')}:00</span>
+                            ${marks}
+                            ${labels}
+                         </div>`;
             }
             document.getElementById('time-ruler').innerHTML = html;
         }
 
         function renderGrid() {
             let html = '';
+            const hourWidth = 60 * state.zoom;
+            
             for (let i = 0; i < 24; i++) {
-                html += `<div class="border-r border-slate-200/60 border-dashed h-full" style="width: ${60 * state.zoom}px"></div>`;
+                let innerLines = '';
+                
+                // Zoom muy alto (>= 8): Líneas cada 5 minutos
+                if (state.zoom >= 8) {
+                    for (let m = 5; m < 60; m += 5) {
+                        const pos = (m / 60) * 100;
+                        const opacity = m % 15 === 0 ? '0.3' : '0.15';
+                        const dashStyle = m % 15 === 0 ? 'border-dashed' : 'border-dotted';
+                        innerLines += `<div class="absolute top-0 bottom-0 w-px border-r border-slate-200 ${dashStyle} h-full" style="left: ${pos}%; opacity: ${opacity};"></div>`;
+                    }
+                }
+                // Zoom alto (>= 4): Líneas cada 10 minutos
+                else if (state.zoom >= 4) {
+                    for (let m = 10; m < 60; m += 10) {
+                        const pos = (m / 60) * 100;
+                        const opacity = m % 30 === 0 ? '0.3' : '0.2';
+                        innerLines += `<div class="absolute top-0 bottom-0 w-px border-r border-slate-200 border-dashed h-full" style="left: ${pos}%; opacity: ${opacity};"></div>`;
+                    }
+                }
+                // Zoom medio (>= 2): Líneas cada 15 minutos
+                else if (state.zoom >= 2) {
+                    innerLines += `<div class="absolute top-0 bottom-0 left-1/4 w-px border-r border-slate-200 border-dotted h-full opacity-20"></div>`;
+                    innerLines += `<div class="absolute top-0 bottom-0 left-2/4 w-px border-r border-slate-200 border-dashed h-full opacity-25"></div>`;
+                    innerLines += `<div class="absolute top-0 bottom-0 left-3/4 w-px border-r border-slate-200 border-dotted h-full opacity-20"></div>`;
+                }
+                // Zoom bajo (>= 0.8): Solo línea de 30 minutos
+                else if (state.zoom >= 0.8) {
+                    innerLines += `<div class="absolute top-0 bottom-0 left-2/4 w-px border-r border-slate-200 border-dashed h-full opacity-20"></div>`;
+                }
+                
+                html += `<div class="border-r border-slate-200/60 border-dashed h-full relative" style="width: ${hourWidth}px">${innerLines}</div>`;
             }
             document.getElementById('grid-lines').innerHTML = html;
         }
@@ -578,7 +933,6 @@
             state.selectedNodeId = nodeId;
             
             let areaOptions = state.areas.map(a => `<option value="${a.id}" ${node.areaId === a.id ? 'selected' : ''}>${a.name}</option>`).join('');
-            let colorButtons = ['#ffffff', '#eff6ff', '#ecfdf5', '#fef2f2', '#fefce8', '#f5f3ff'].map(c => `<button onclick="updateNodeProp('color', '${c}')" class="w-8 h-8 rounded-full border-2 transition-all ${node.color === c ? 'border-blue-500 scale-110 shadow-sm' : 'border-slate-200 hover:scale-105'}" style="background-color: ${c}"></button>`).join('');
 
             let customFieldsHtml = (node.customFields || []).map(cf => `
                 <div class="flex space-x-2 items-start group">
@@ -659,7 +1013,13 @@
 
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Color</label>
-                        <div class="flex gap-2">${colorButtons}</div>
+                        <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <input type="color" value="${node.color || '#ffffff'}" onchange="updateNodeProp('color', this.value)" class="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200 hover:border-slate-300 transition-all" style="background: ${node.color || '#ffffff'};" />
+                            <div class="flex-1">
+                                <div class="text-xs font-medium text-slate-600">Color de fondo</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${node.color || '#ffffff'}</div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="border-t border-slate-100 pt-5">
@@ -713,7 +1073,64 @@
 
         function closePropertiesModal() { document.getElementById('properties-modal-overlay').classList.remove('active'); }
         function togglePanel() { state.isPanelCollapsed = !state.isPanelCollapsed; localStorage.setItem('chronomap_panel_collapsed_vanilla', state.isPanelCollapsed.toString()); renderAll(); }
-        function handleZoomScroll(e) { if (!e.ctrlKey) return; e.preventDefault(); state.zoom = Math.max(0.5, Math.min(10, state.zoom + (-Math.sign(e.deltaY) * 0.2))); renderAll(); }
+        
+        function handleZoomScroll(e) { 
+            if (!e.ctrlKey) return; 
+            e.preventDefault(); 
+            
+            const container = document.getElementById('scroll-container');
+            const rect = container.getBoundingClientRect();
+            
+            // Posición del mouse relativa al contenedor
+            const mouseX = e.clientX - rect.left;
+            
+            // Posición de scroll actual
+            const scrollLeft = container.scrollLeft;
+            
+            // Posición absoluta del mouse en el contenido
+            const mousePositionInContent = scrollLeft + mouseX;
+            
+            // Calcular la posición relativa (0-1) en el contenido actual
+            const relativePosition = mousePositionInContent / (TOTAL_MINUTES * state.zoom);
+            
+            // Aplicar zoom
+            const oldZoom = state.zoom;
+            const zoomDelta = -Math.sign(e.deltaY) * 0.2;
+            state.zoom = Math.max(0.5, Math.min(10, state.zoom + zoomDelta));
+            
+            // Renderizar con nuevo zoom
+            renderAll();
+            
+            // Calcular nueva posición de scroll para mantener el mouse en el mismo lugar
+            const newContentWidth = TOTAL_MINUTES * state.zoom;
+            const newMousePositionInContent = relativePosition * newContentWidth;
+            const newScrollLeft = newMousePositionInContent - mouseX;
+            
+            // Aplicar nuevo scroll
+            container.scrollLeft = newScrollLeft;
+        }
+        
+        function changeZoom(delta) {
+            const container = document.getElementById('scroll-container');
+            const scrollLeft = container.scrollLeft;
+            const containerWidth = container.clientWidth;
+            
+            // Calcular punto central del viewport
+            const centerPosition = scrollLeft + (containerWidth / 2);
+            const relativePosition = centerPosition / (TOTAL_MINUTES * state.zoom);
+            
+            // Aplicar zoom
+            state.zoom = Math.max(0.5, Math.min(10, state.zoom + delta));
+            
+            // Renderizar
+            renderAll();
+            
+            // Mantener centrado
+            const newContentWidth = TOTAL_MINUTES * state.zoom;
+            const newCenterPosition = relativePosition * newContentWidth;
+            container.scrollLeft = newCenterPosition - (containerWidth / 2);
+        }
+        
         function clearCanvas() { if (state.nodes.length === 0) return showToast('📦 El lienzo ya está vacío'); showConfirmationModal('¿Limpiar lienzo?', 'Se eliminarán todas las actividades.', () => { state.nodes = []; state.selectedNodeId = null; renderAll(); showToast('✅ Lienzo limpiado'); }); }
         
         function showConfirmationModal(title, message, onConfirm) {
